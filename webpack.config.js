@@ -4,13 +4,16 @@ const {
 } = require('path');
 
 module.exports = {
+  context: resolve('./src'),
   entry: {
-      timeline:'./src/timeline.js',
-      typhoon:'./src/typhoon.js'
+      timeline:'./timeline.js',
+      typhoon:'./typhoon.js'
   },
   output: {
+    library: '[name]',
+    libraryTarget: 'umd',
     filename: '[name].js',
-    path: resolve(__dirname, 'build/')
+    path: resolve(__dirname, 'build')
   },
   module: {
     rules: [

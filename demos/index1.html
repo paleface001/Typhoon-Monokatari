@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Typhoon Monikatari</title>
+  <link rel="stylesheet" href="./style/style.css" type="text/css" />
+</head>
+<body>
+<div id="timeline"></div>
+</body>
+<script src="./assets/static/jquery-3.2.1.min.js"></script>
+<script src="../build/timeline.js"></script>
+<script>
+  //create timeline
+  const tl = new timeline({
+    start: '2000-05-22 12:00:00',
+    end: '2015-11-29 12:00:00',
+    step: 1000 * 60 * 60 * 48,
+    container:'timeline',
+    tickCount:3,
+    width:$('#timeline').width(),
+    height:$('#timeline').height()
+  });
+  tl.start();
+</script>
+
+</html>

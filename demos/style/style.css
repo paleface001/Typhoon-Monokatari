@@ -1,0 +1,10 @@
+#timeline{
+    width: 60%;
+    height: 50px;
+    position: relative;
+    float: left;
+    margin-left: 20%;
+    margin-top: 100px;
+}
+
+canvas{position: absolute!important}

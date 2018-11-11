@@ -6,14 +6,39 @@ const getPort = require('get-port');
 const http = require('http');
 const open = require('open');
 const serveStatic = require('serve-static');
+const parseurl = require('parseurl');
 const assign = require('lodash').assign;
 const path = require('path');
 const resolve = path.resolve;
+const extname = path.extname;
+const basename = path.basename;
 const join = path.join;
 const fs = require('fs');
+const statSync = fs.statSync;
+const lstatSync = fs.lstatSync;
+const readdirSync = fs.readdirSync;
 const readFileSync = fs.readFileSync;
+const mkdirSync = fs.mkdirSync;
+const nunjucks = require('nunjucks');
+const renderString = nunjucks.renderString;
 const pkg = require('../package.json');
 
+function isFile(source) {
+  return lstatSync(source).isFile();
+}
+
+function getFiles(source) {
+  return readdirSync(source).map(function(name) {
+    return join(source, name);
+  }).filter(isFile);
+}
+
+const screenshotsPath = join(process.cwd(), './demos/assets/screenshots');
+try {
+  statSync(screenshotsPath);
+} catch (e) {
+  mkdirSync(screenshotsPath);
+}
 
 commander
   .version(pkg.version)
@@ -25,8 +50,31 @@ function startService(port) {
   const server = connect();
   server.use((req, res, next) => {
     if (req.method === 'GET') {
-        const template = readFileSync(join(__dirname, './index.html'), 'utf8');
-        res.end(template);
+      const pathname = parseurl(req).pathname;
+      if (pathname === '/demos/index.html') {
+        const demoFiles = getFiles(__dirname)
+          .filter(filename => {
+            return extname(filename) === '.html';
+          })
+          .map(filename => {
+            const bn = basename(filename, '.html');
+            const file = {
+              screenshot: `/demos/assets/screenshots/${bn}.png`,
+              basename: bn,
+              content: readFileSync(filename),
+              filename
+            };
+            return file;
+          });
+        const template = readFileSync(join(__dirname, './index.njk'), 'utf8');
+        res.end(renderString(template, {
+          demoFiles
+        }));
+      } else {
+        next();
+      }
+    } else {
+      next();
     }
   });
   server.use(serveStatic(process.cwd()));
