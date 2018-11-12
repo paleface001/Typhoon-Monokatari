@@ -15435,16 +15435,18 @@ var Timeline = function () {
     //ticks
     var ticks = self.canvas.addGroup();
     for (var i = 0; i <= self.tickCount; i++) {
+      var tickNumber = self.startStamp + self.duration / self.tickCount * i;
       var tick = ticks.addGroup();
-      tick.addShape('circle', {
+      var circle = tick.addShape('circle', {
         attrs: {
           r: 8,
           fill: '#7f7f7f',
           x: 0,
-          y: self.height / 2
+          y: self.height / 2,
+          stamp: tickNumber
         }
       });
-      var tickNumber = self.startStamp + self.duration / self.tickCount * i;
+      self._wrapperClickEvents(circle);
       var tickText = self._toTimeString(tickNumber);
       tick.addShape('text', {
         attrs: {
@@ -15513,6 +15515,15 @@ var Timeline = function () {
       }
     }
     return tickNumbers;
+  };
+
+  Timeline.prototype._wrapperClickEvents = function _wrapperClickEvents(shape) {
+    var self = this;
+    shape.on('mousedown', function (ev) {
+      var target = ev.target;
+      var stamp = target.attr('stamp');
+      self.current = stamp;
+    });
   };
 
   return Timeline;
