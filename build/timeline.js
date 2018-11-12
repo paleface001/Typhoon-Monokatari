@@ -15348,6 +15348,9 @@ var Timeline = function () {
   Timeline.prototype.stop = function stop() {
     this.pause();
     this.current = this.startStamp;
+    //ui
+    this.canvas.clear();
+    this._initUI();
   };
 
   Timeline.prototype.render = function render() {
@@ -15357,7 +15360,7 @@ var Timeline = function () {
     var timelineWidth = self.width - self.padding * 2;
     var progressWidth = timelineWidth * SCALED;
     //update current time tick
-    if (percentIndex !== self.currentTick) {
+    if (percentIndex !== self.currentTick && percentIndex < self.tickCount) {
       self.currentTick = percentIndex;
       var tickNumbers = self._calTickNumber();
       self.progressStart = self.padding + timelineWidth * tickNumbers[self.currentTick];

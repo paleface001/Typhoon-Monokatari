@@ -53,6 +53,9 @@ class Timeline {
   stop() {
     this.pause();
     this.current = this.startStamp;
+    //ui
+    this.canvas.clear();
+    this._initUI();
   }
 
 
@@ -63,7 +66,7 @@ class Timeline {
     const timelineWidth = self.width - self.padding * 2;
     const progressWidth = timelineWidth * SCALED;
     //update current time tick
-    if (percentIndex !== self.currentTick) {
+    if (percentIndex !== self.currentTick && percentIndex<self.tickCount) {
       self.currentTick = percentIndex;
       const tickNumbers = self._calTickNumber();
       self.progressStart = self.padding + timelineWidth * tickNumbers[self.currentTick];
@@ -246,7 +249,6 @@ class Timeline {
       self.current = stamp;
     });
   }
-
 
 }
 
