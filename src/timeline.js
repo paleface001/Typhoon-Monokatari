@@ -54,7 +54,7 @@ class Timeline {
     this.pause();
     this.current = this.startStamp;
     //ui
-    this.canvas.clear();
+    this.canvas.destroy();
     this._initUI();
   }
 
@@ -167,7 +167,7 @@ class Timeline {
           stamp:tickNumber
         }
       });
-      self._wrapperClickEvents(circle);
+      self._wrapClickEvents(circle);
       const tickText = self._toTimeString(tickNumber);
       tick.addShape('text', {
         attrs: {
@@ -198,6 +198,7 @@ class Timeline {
     container.clear();
     for(let i = 1; i<tickNum; i++){
       const tick = container.addGroup();
+      const tickNumber = start + duration / tickNum * i;
       tick.addShape('path',{
         attrs:{
           path:[
@@ -205,12 +206,12 @@ class Timeline {
             ['L',0,self.height/2 + 5]
           ],
           stroke:'#c3232d',
-          lineWidth:2
+          lineWidth:2,
+          stamp:tickNumber
         }
       });
-      const tickNumber = start + duration / tickNum * i;
       const tickText = self._toTimeString(tickNumber);
-      tick.addShape('text', {
+      const text = tick.addShape('text', {
         attrs: {
           text: tickText,
           fill: '#c6c6c8',
@@ -218,11 +219,14 @@ class Timeline {
           textAlign: 'center',
           textBaseline: 'middle',
           x: 0,
-          y: self.height / 2 + 20
+          y: self.height / 2 + 20,
+          stamp:tickNumber
         }
       });
       const x = segWidth / tickNum * i;
       tick.translate(x, 0);
+      tick.attr('stamp',tickNum);
+      self._wrapClickEvents(tick);
     }
   }
 
@@ -241,7 +245,7 @@ class Timeline {
     return tickNumbers;
   }
 
-  _wrapperClickEvents(shape){
+  _wrapClickEvents(shape){
     const self = this;
     shape.on('mousedown',function(ev){
       const target = ev.target;

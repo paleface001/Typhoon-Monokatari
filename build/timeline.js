@@ -15349,7 +15349,7 @@ var Timeline = function () {
     this.pause();
     this.current = this.startStamp;
     //ui
-    this.canvas.clear();
+    this.canvas.destroy();
     this._initUI();
   };
 
@@ -15449,7 +15449,7 @@ var Timeline = function () {
           stamp: tickNumber
         }
       });
-      self._wrapperClickEvents(circle);
+      self._wrapClickEvents(circle);
       var tickText = self._toTimeString(tickNumber);
       tick.addShape('text', {
         attrs: {
@@ -15480,16 +15480,17 @@ var Timeline = function () {
     container.clear();
     for (var i = 1; i < tickNum; i++) {
       var tick = container.addGroup();
+      var tickNumber = start + duration / tickNum * i;
       tick.addShape('path', {
         attrs: {
           path: [['M', 0, self.height / 2 - 5], ['L', 0, self.height / 2 + 5]],
           stroke: '#c3232d',
-          lineWidth: 2
+          lineWidth: 2,
+          stamp: tickNumber
         }
       });
-      var tickNumber = start + duration / tickNum * i;
       var tickText = self._toTimeString(tickNumber);
-      tick.addShape('text', {
+      var text = tick.addShape('text', {
         attrs: {
           text: tickText,
           fill: '#c6c6c8',
@@ -15497,11 +15498,14 @@ var Timeline = function () {
           textAlign: 'center',
           textBaseline: 'middle',
           x: 0,
-          y: self.height / 2 + 20
+          y: self.height / 2 + 20,
+          stamp: tickNumber
         }
       });
       var x = segWidth / tickNum * i;
       tick.translate(x, 0);
+      tick.attr('stamp', tickNum);
+      self._wrapClickEvents(tick);
     }
   };
 
@@ -15520,7 +15524,7 @@ var Timeline = function () {
     return tickNumbers;
   };
 
-  Timeline.prototype._wrapperClickEvents = function _wrapperClickEvents(shape) {
+  Timeline.prototype._wrapClickEvents = function _wrapClickEvents(shape) {
     var self = this;
     shape.on('mousedown', function (ev) {
       var target = ev.target;
