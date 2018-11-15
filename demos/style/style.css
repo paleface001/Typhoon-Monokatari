@@ -8,3 +8,5 @@
 }
 
 canvas{position: absolute!important}
+
+.playground{width: 600px; height: 600px; position: absolute; top:0px; left:0px; background-color: #e9ecef;}

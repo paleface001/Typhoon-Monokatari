@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Typhoon Monikatari</title>
+  <link rel="stylesheet" href="./style/style.css" type="text/css" />
+</head>
+<body>
+<div id ='typhoon' class="playground"></div>
+</body>
+<script src="./assets/static/jquery-3.2.1.min.js"></script>
+<script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.g2-3.3.2/dist/g2.min.js"></script>
+<script src="../build/typhoon.js"></script>
+<script>
+  const dataSample = {"date": {"year": "2015", "month": "07", "day": "14"}, "time": "12", "event": "  ", "status": "HU", "lat": "17.5N", "lng": "107.8W", "maxWind": 75, "minPressure": 980, "low_wind_ne": 120, "low_wind_se": 120, "low_wind_sw": 50, "low_wind_nw": 100, "mode_wind_ne": 60, "mode_wind_se": 40, "mode_wind_sw": 30, "mode_wind_nw": 40, "high_wind_ne": 20, "high_wind_se": 0, "high_wind_sw": 0, "high_wind_nw": 20};
+  //create canvas
+  const canvas = new G2.G.Canvas({
+    containerId: 'typhoon',
+    width: $('#typhoon').width(),
+    height: $('#typhoon').height()
+  });
+  //initialize typhoon
+  const tp = new typhoon({
+    data:dataSample,
+    canvas:canvas,
+    radius:100
+  });
+  tp.draw();
+</script>
+
+</html>
