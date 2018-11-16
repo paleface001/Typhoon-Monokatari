@@ -15310,59 +15310,7 @@ var Typhoon = function () {
     var x = self.canvas.get('width') / 2;
     var y = self.canvas.get('height') / 2;
     self.container.translate(x, y);
-  };
-
-  Typhoon.prototype.draw = function draw() {
-    var self = this;
-    var center = { x: 0, y: 0 };
-    var vertices = self._windDirVertex();
-    //ne
-    var ne_path = [['M', center.x, center.y], ['L', vertices.e.x, vertices.ne.y], ['L', vertices.e.x, center.y], ['Z']];
-    self.container.addShape('path', {
-      attrs: {
-        path: ne_path,
-        stroke: 'black',
-        lineWidth: 2
-      }
-    });
-    //se
-    var se_path = [['M', center.x, center.y], ['L', vertices.e.x, center.y], ['L', vertices.e.x, vertices.se.y], ['Z']];
-    self.container.addShape('path', {
-      attrs: {
-        path: se_path,
-        stroke: 'black',
-        lineWidth: 2
-      }
-    });
-    //sw
-    var sw_path = [['M', center.x, center.y], ['L', vertices.w.x, center.y], ['L', vertices.w.x, vertices.sw.y], ['Z']];
-    self.container.addShape('path', {
-      attrs: {
-        path: sw_path,
-        stroke: 'black',
-        lineWidth: 2
-      }
-    });
-    //nw
-    var nw_path = [['M', center.x, center.y], ['L', vertices.w.x, vertices.nw.y], ['L', vertices.w.x, center.y], ['Z']];
-    self.container.addShape('path', {
-      attrs: {
-        path: nw_path,
-        stroke: 'black',
-        lineWidth: 2
-      }
-    });
-
-    //name
-    self.container.addShape('circle', {
-      attrs: {
-        x: center.x,
-        y: center.y - self.radius / 5,
-        r: 10,
-        fill: 'black'
-      }
-    });
-
+    self._initializeShape();
     self.canvas.draw();
   };
 
@@ -15375,17 +15323,42 @@ var Typhoon = function () {
   //wind shape generate
 
 
-  Typhoon.prototype._windDirVertex = function _windDirVertex() {
+  Typhoon.prototype._initializeShape = function _initializeShape() {
+    var self = this;
+    var data = self._constructShapeData();
+    var dirs = ['ne', 'se', 'sw', 'nw'];
+    var levels = ['low', 'mode', 'high'];
+    var colors = { 'low': '#881678', 'mode': '#ed2236', 'high': '#e56524' };
+    for (var i = 0; i < levels.length; i++) {
+      var level = levels[i];
+      var vertices = self._windDirVertex(data[level]);
+      var c = colors[level];
+      for (var j = 0; j < dirs.length; j++) {
+        var dir = dirs[j];
+        var path = self._getShapePath(dir, vertices);
+        var shape = self.container.addShape('path', {
+          attrs: {
+            path: path,
+            fill: c,
+            opacity: 0.5
+          }
+        });
+        self[level + '_' + dir + '_wing'] = shape;
+      }
+    }
+  };
+
+  Typhoon.prototype._windDirVertex = function _windDirVertex(d) {
     var self = this;
     var startAngle = -90 * Math.PI / 180;
     var ne_angle = startAngle + 45 * Math.PI / 180;
     var nw_angle = startAngle + 315 * Math.PI / 180;
     var se_angle = startAngle + 135 * Math.PI / 180;
     var sw_angle = startAngle + 225 * Math.PI / 180;
-    var ne = self._getVertexPosition(ne_angle, self.data.low_wind_ne);
-    var nw = self._getVertexPosition(nw_angle, self.data.low_wind_nw);
-    var se = self._getVertexPosition(se_angle, self.data.low_wind_se);
-    var sw = self._getVertexPosition(sw_angle, self.data.low_wind_sw);
+    var ne = self._getVertexPosition(ne_angle, d.ne);
+    var nw = self._getVertexPosition(nw_angle, d.nw);
+    var se = self._getVertexPosition(se_angle, d.se);
+    var sw = self._getVertexPosition(sw_angle, d.sw);
 
     var c = { x: 0, y: 0 };
     var w = { x: -self.radius, y: 0 };
@@ -15404,13 +15377,40 @@ var Typhoon = function () {
     return { x: x, y: y };
   };
 
-  //data mapping
+  Typhoon.prototype._getShapePath = function _getShapePath(dir, vertices) {
+    if (dir === 'ne') {
+      return [['M', vertices.c.x, vertices.c.y], ['L', vertices.e.x, vertices.ne.y], ['L', vertices.e.x, vertices.c.y], ['Z']];
+    } else if (dir === 'se') {
+      return [['M', vertices.c.x, vertices.c.y], ['L', vertices.e.x, vertices.c.y], ['L', vertices.e.x, vertices.se.y], ['Z']];
+    } else if (dir === 'sw') {
+      return [['M', vertices.c.x, vertices.c.y], ['L', vertices.w.x, vertices.c.y], ['L', vertices.w.x, vertices.sw.y], ['Z']];
+    } else if (dir === 'nw') {
+      return [['M', vertices.c.x, vertices.c.y], ['L', vertices.w.x, vertices.nw.y], ['L', vertices.w.x, vertices.c.y], ['Z']];
+    }
+  };
+
+  //data prcessing
+  //construction
+
+
+  Typhoon.prototype._constructShapeData = function _constructShapeData() {
+    var self = this;
+    //low
+    var low = { ne: self.data.low_wind_ne, se: self.data.low_wind_se, sw: self.data.low_wind_sw, nw: self.data.low_wind_nw };
+    //mode
+    var mode = { ne: self.data.mode_wind_ne, se: self.data.mode_wind_se, sw: self.data.mode_wind_sw, nw: self.data.mode_wind_nw };
+    //high
+    var high = { ne: self.data.high_wind_ne, se: self.data.high_wind_se, sw: self.data.high_wind_sw, nw: self.data.high_wind_nw };
+    return { low: low, mode: mode, high: high };
+  };
+
+  //mapping
 
 
   Typhoon.prototype._getRaidus = function _getRaidus(d) {
     var self = this;
     var max = 150;
-    var min = 100;
+    var min = 0;
     return (d - min) / (max - min) * self.radius;
   };
 
