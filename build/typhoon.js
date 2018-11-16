@@ -15328,7 +15328,8 @@ var Typhoon = function () {
     var data = self._constructShapeData();
     var dirs = ['ne', 'se', 'sw', 'nw'];
     var levels = ['low', 'mode', 'high'];
-    var colors = { 'low': '#881678', 'mode': '#ed2236', 'high': '#e56524' };
+    var colors = { 'low': '#e56524', 'mode': '#ed2236', 'high': '#881678' };
+    //draw wings
     for (var i = 0; i < levels.length; i++) {
       var level = levels[i];
       var vertices = self._windDirVertex(data[level]);
@@ -15346,6 +15347,17 @@ var Typhoon = function () {
         self[level + '_' + dir + '_wing'] = shape;
       }
     }
+    //draw head
+    var head = self.container.addShape('circle', {
+      attrs: {
+        fill: 'white',
+        stroke: '#646464',
+        lineWidth: 2,
+        r: 5,
+        x: 0,
+        y: -30
+      }
+    });
   };
 
   Typhoon.prototype._windDirVertex = function _windDirVertex(d) {
@@ -15379,13 +15391,13 @@ var Typhoon = function () {
 
   Typhoon.prototype._getShapePath = function _getShapePath(dir, vertices) {
     if (dir === 'ne') {
-      return [['M', vertices.c.x, vertices.c.y], ['L', vertices.e.x, vertices.ne.y], ['L', vertices.e.x, vertices.c.y], ['Z']];
+      return [['M', vertices.c.x, vertices.c.y], ['L', vertices.ne.x, vertices.ne.y], ['L', vertices.ne.x, vertices.c.y], ['Z']];
     } else if (dir === 'se') {
-      return [['M', vertices.c.x, vertices.c.y], ['L', vertices.e.x, vertices.c.y], ['L', vertices.e.x, vertices.se.y], ['Z']];
+      return [['M', vertices.c.x, vertices.c.y], ['L', vertices.se.x, vertices.c.y], ['L', vertices.se.x, vertices.se.y], ['Z']];
     } else if (dir === 'sw') {
-      return [['M', vertices.c.x, vertices.c.y], ['L', vertices.w.x, vertices.c.y], ['L', vertices.w.x, vertices.sw.y], ['Z']];
+      return [['M', vertices.c.x, vertices.c.y], ['L', vertices.sw.x, vertices.c.y], ['L', vertices.sw.x, vertices.sw.y], ['Z']];
     } else if (dir === 'nw') {
-      return [['M', vertices.c.x, vertices.c.y], ['L', vertices.w.x, vertices.nw.y], ['L', vertices.w.x, vertices.c.y], ['Z']];
+      return [['M', vertices.c.x, vertices.c.y], ['L', vertices.nw.x, vertices.nw.y], ['L', vertices.nw.x, vertices.c.y], ['Z']];
     }
   };
 

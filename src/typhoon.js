@@ -36,7 +36,8 @@ class Typhoon {
     const data = self._constructShapeData();
     const dirs = ['ne', 'se', 'sw', 'nw'];
     const levels = ['low', 'mode', 'high'];
-    const colors = {'low':'#881678','mode':'#ed2236','high':'#e56524'}
+    const colors = {'low':'#e56524','mode':'#ed2236','high':'#881678'};
+    //draw wings
     for (let i = 0; i < levels.length; i++) {
       const level = levels[i];
       const vertices = self._windDirVertex(data[level]);
@@ -54,6 +55,17 @@ class Typhoon {
         self[level + '_' + dir + '_wing'] = shape;
       }
     }
+    //draw head
+    const head = self.container.addShape('circle',{
+      attrs:{
+        fill:'white',
+        stroke:'#646464',
+        lineWidth:2,
+        r:5,
+        x:0,
+        y:-30
+      }
+    });
   }
 
 
@@ -91,29 +103,29 @@ class Typhoon {
     if (dir === 'ne') {
       return [
         ['M', vertices.c.x, vertices.c.y],
-        ['L', vertices.e.x, vertices.ne.y],
-        ['L', vertices.e.x, vertices.c.y],
+        ['L', vertices.ne.x, vertices.ne.y],
+        ['L', vertices.ne.x, vertices.c.y],
         ['Z']
       ];
     } else if (dir === 'se') {
       return [
         ['M', vertices.c.x, vertices.c.y],
-        ['L', vertices.e.x, vertices.c.y],
-        ['L', vertices.e.x, vertices.se.y],
+        ['L', vertices.se.x, vertices.c.y],
+        ['L', vertices.se.x, vertices.se.y],
         ['Z']
       ];
     } else if (dir === 'sw') {
       return [
         ['M', vertices.c.x, vertices.c.y],
-        ['L', vertices.w.x, vertices.c.y],
-        ['L', vertices.w.x, vertices.sw.y],
+        ['L', vertices.sw.x, vertices.c.y],
+        ['L', vertices.sw.x, vertices.sw.y],
         ['Z']
       ];
     } else if (dir === 'nw') {
       return [
         ['M', vertices.c.x, vertices.c.y],
-        ['L', vertices.w.x, vertices.nw.y],
-        ['L', vertices.w.x, vertices.c.y],
+        ['L', vertices.nw.x, vertices.nw.y],
+        ['L', vertices.nw.x, vertices.c.y],
         ['Z']
       ];
     }
