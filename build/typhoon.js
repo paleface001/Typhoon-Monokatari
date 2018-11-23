@@ -15292,7 +15292,10 @@ module.exports = function (module) {
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var Shape = __webpack_require__(4);
 var G = __webpack_require__(0);
+
+var SIZE = 200;
 
 var Typhoon = function () {
   function Typhoon(cfg) {
@@ -15306,20 +15309,67 @@ var Typhoon = function () {
 
   Typhoon.prototype._init_ = function _init_() {
     var self = this;
-    self.container = self.canvas.addGroup();
-    var x = self.canvas.get('width') / 2;
-    var y = self.canvas.get('height') / 2;
-    self.container.translate(x, y);
-    self._initializeShape();
+    self.shape = new Shape({
+      data: dataSample,
+      canvas: canvas,
+      radius: SIZE
+    });
     self.canvas.draw();
   };
 
   Typhoon.prototype.setData = function setData(data) {
     var self = this;
     self.data = data;
+    self.shape.setData(data);
   };
 
   Typhoon.prototype.update = function update() {
+    var self = this;
+    self.shape.update();
+  };
+
+  Typhoon.prototype.clear = function clear() {};
+
+  Typhoon.prototype.destory = function destory() {};
+
+  return Typhoon;
+}();
+
+module.exports = Typhoon;
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var G = __webpack_require__(0);
+
+var TyphoonShape = function () {
+  function TyphoonShape(cfg) {
+    _classCallCheck(this, TyphoonShape);
+
+    this.data = cfg.data;
+    this.canvas = cfg.canvas;
+    this.radius = cfg.radius;
+    this._init_();
+  }
+
+  TyphoonShape.prototype._init_ = function _init_() {
+    var self = this;
+    self.container = self.canvas.addGroup();
+    var x = self.canvas.get('width') / 2;
+    var y = self.canvas.get('height') / 2;
+    self.container.translate(x, y);
+    self._initializeShape();
+  };
+
+  TyphoonShape.prototype.setData = function setData(data) {
+    var self = this;
+    self.data = data;
+  };
+
+  TyphoonShape.prototype.update = function update() {
     var self = this;
     var data = self._constructShapeData();
     var dirs = ['ne', 'se', 'sw', 'nw'];
@@ -15343,14 +15393,14 @@ var Typhoon = function () {
     self.canvas.draw();
   };
 
-  Typhoon.prototype.clear = function clear() {};
+  TyphoonShape.prototype.clear = function clear() {};
 
-  Typhoon.prototype.destory = function destory() {};
+  TyphoonShape.prototype.destory = function destory() {};
 
   //wind shape generate
 
 
-  Typhoon.prototype._initializeShape = function _initializeShape() {
+  TyphoonShape.prototype._initializeShape = function _initializeShape() {
     var self = this;
     var data = self._constructShapeData();
     var dirs = ['ne', 'se', 'sw', 'nw'];
@@ -15387,7 +15437,7 @@ var Typhoon = function () {
     });
   };
 
-  Typhoon.prototype._windDirVertex = function _windDirVertex(d) {
+  TyphoonShape.prototype._windDirVertex = function _windDirVertex(d) {
     var self = this;
     var startAngle = -90 * Math.PI / 180;
     var ne_angle = startAngle + 45 * Math.PI / 180;
@@ -15408,7 +15458,7 @@ var Typhoon = function () {
     return { ne: ne, nw: nw, se: se, sw: sw, w: w, e: e, n: n, s: s, c: c };
   };
 
-  Typhoon.prototype._getVertexPosition = function _getVertexPosition(angle, d) {
+  TyphoonShape.prototype._getVertexPosition = function _getVertexPosition(angle, d) {
     var self = this;
     var radius = self._getRaidus(d);
     var x = Math.cos(angle) * radius;
@@ -15416,7 +15466,7 @@ var Typhoon = function () {
     return { x: x, y: y };
   };
 
-  Typhoon.prototype._getShapePath = function _getShapePath(dir, vertices) {
+  TyphoonShape.prototype._getShapePath = function _getShapePath(dir, vertices) {
     if (dir === 'ne') {
       return [['M', vertices.c.x, vertices.c.y], ['L', vertices.ne.x, vertices.ne.y], ['L', vertices.ne.x, vertices.c.y], ['Z']];
     } else if (dir === 'se') {
@@ -15428,11 +15478,13 @@ var Typhoon = function () {
     }
   };
 
+  TyphoonShape.prototype._calHeading = function _calHeading() {};
+
   //data prcessing
   //construction
 
 
-  Typhoon.prototype._constructShapeData = function _constructShapeData() {
+  TyphoonShape.prototype._constructShapeData = function _constructShapeData() {
     var self = this;
     //low
     var low = { ne: self.data.low_wind_ne, se: self.data.low_wind_se, sw: self.data.low_wind_sw, nw: self.data.low_wind_nw };
@@ -15446,17 +15498,17 @@ var Typhoon = function () {
   //mapping
 
 
-  Typhoon.prototype._getRaidus = function _getRaidus(d) {
+  TyphoonShape.prototype._getRaidus = function _getRaidus(d) {
     var self = this;
     var max = 150;
     var min = 0;
     return (d - min) / (max - min) * self.radius;
   };
 
-  return Typhoon;
+  return TyphoonShape;
 }();
 
-module.exports = Typhoon;
+module.exports = TyphoonShape;
 
 /***/ })
 /******/ ]);
