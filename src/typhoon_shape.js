@@ -1,19 +1,24 @@
 const G = require('@antv/g');
 
+const DIRS = ['ne', 'se', 'sw', 'nw'];
+const LEVELS = ['low', 'mode', 'high'];
+const COLORS = { 'low': '#e56524', 'mode': '#ed2236', 'high': '#881678' };
+const DURATION = 500;
+
 class TyphoonShape {
   constructor(cfg) {
     this.data = cfg.data;
     this.canvas = cfg.canvas;
     this.radius = cfg.radius;
+    this.x = cfg.x;
+    this.y = cfg.y;
     this._init_();
   }
 
   _init_() {
     const self = this;
     self.container = self.canvas.addGroup();
-    const x = self.canvas.get('width') / 2;
-    const y = self.canvas.get('height') / 2;
-    self.container.translate(x, y);
+    self.container.translate(self.x, self.y);
     self._initializeShape();
   }
 
@@ -22,28 +27,33 @@ class TyphoonShape {
     self.data = data;
   }
 
+  moveTo(x,y){
+    const self = this;
+    //heading
+    const dx = self.x - x;
+    const dy = self.y - y;
+    const angle = Math.atan2(dy,dx);
+    const mat = self.container.attr('matrix');
+    mat[0] = Math.cos(angle);
+    mat[1] = -Math.sin(angle);
+    mat[3] = Math.sin(angle);
+    mat[4] = Math.cos(angle);
+    //moving
+    /*const ulMatrix = [ 1, 0, 0,
+                       0, 1, 0, 
+                       x, y, 1 ];*/
+    const ulMatrix = [ Math.cos(angle), -Math.sin(angle), 0,
+                       Math.sin(angle), Math.cos(angle), 0, 
+                       x, y, 1 ];
+    self.container.stopAnimate();
+    self.container.animate({
+      matrix: ulMatrix
+    },DURATION);
+  }
+  
   update() {
     const self = this;
-    const data = self._constructShapeData();
-    const dirs = ['ne', 'se', 'sw', 'nw'];
-    const levels = ['low', 'mode', 'high'];
-    const colors = { 'low': '#e56524', 'mode': '#ed2236', 'high': '#881678' };
-    //draw wings
-    for (let i = 0; i < levels.length; i++) {
-      const level = levels[i];
-      const vertices = self._windDirVertex(data[level]);
-      const c = colors[level];
-      for (let j = 0; j < dirs.length; j++) {
-        const dir = dirs[j];
-        const path = self._getShapePath(dir, vertices);
-        const shape = self[level + '_' + dir + '_wing'];
-        shape.animate({
-          path
-        }, 300, 'easeLinear');
-      }
-    }
-
-    self.canvas.draw();
+    self._updateShape(); 
   }
 
   clear() {
@@ -58,16 +68,13 @@ class TyphoonShape {
   _initializeShape() {
     const self = this;
     const data = self._constructShapeData();
-    const dirs = ['ne', 'se', 'sw', 'nw'];
-    const levels = ['low', 'mode', 'high'];
-    const colors = { 'low': '#e56524', 'mode': '#ed2236', 'high': '#881678' };
     //draw wings
-    for (let i = 0; i < levels.length; i++) {
-      const level = levels[i];
+    for (let i = 0; i < LEVELS.length; i++) {
+      const level = LEVELS[i];
       const vertices = self._windDirVertex(data[level]);
-      const c = colors[level];
-      for (let j = 0; j < dirs.length; j++) {
-        const dir = dirs[j];
+      const c = COLORS[level];
+      for (let j = 0; j < DIRS.length; j++) {
+        const dir = DIRS[j];
         const path = self._getShapePath(dir, vertices);
         const shape = self.container.addShape('path', {
           attrs: {
@@ -84,12 +91,32 @@ class TyphoonShape {
       attrs: {
         fill: 'white',
         stroke: '#646464',
-        lineWidth: 2,
+        lineWidth: 1,
         r: 5,
         x: 0,
-        y: -30
+        y: -self.radius/3
       }
     });
+  }
+
+
+  _updateShape(){
+    const self = this;
+    const data = self._constructShapeData();
+    //draw wings
+    for (let i = 0; i < LEVELS.length; i++) {
+      const level = LEVELS[i];
+      const vertices = self._windDirVertex(data[level]);
+      const c = COLORS[level];
+      for (let j = 0; j < DIRS.length; j++) {
+        const dir = DIRS[j];
+        const path = self._getShapePath(dir, vertices);
+        const shape = self[level + '_' + dir + '_wing'];
+        shape.animate({
+          path
+        }, DURATION, 'easeLinear');
+      }
+    }
   }
 
 

@@ -15295,7 +15295,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var Shape = __webpack_require__(4);
 var G = __webpack_require__(0);
 
-var SIZE = 200;
+var SIZE = 50;
 
 var Typhoon = function () {
   function Typhoon(cfg) {
@@ -15304,6 +15304,7 @@ var Typhoon = function () {
     this.data = cfg.data;
     this.canvas = cfg.canvas;
     this.radius = cfg.radius;
+    this.position = cfg.position ? cfg.position : { x: 0, y: 0 };
     this._init_();
   }
 
@@ -15312,7 +15313,9 @@ var Typhoon = function () {
     self.shape = new Shape({
       data: dataSample,
       canvas: canvas,
-      radius: SIZE
+      radius: SIZE,
+      x: self.position.x,
+      y: self.position.y
     });
     self.canvas.draw();
   };
@@ -15323,9 +15326,17 @@ var Typhoon = function () {
     self.shape.setData(data);
   };
 
+  Typhoon.prototype.setPosition = function setPosition(x, y) {
+    var self = this;
+    self.position.x = x;
+    self.position.y = y;
+  };
+
   Typhoon.prototype.update = function update() {
     var self = this;
     self.shape.update();
+    self.shape.moveTo(self.position.x, self.position.y);
+    self.canvas.draw();
   };
 
   Typhoon.prototype.clear = function clear() {};
@@ -15345,6 +15356,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var G = __webpack_require__(0);
 
+var DIRS = ['ne', 'se', 'sw', 'nw'];
+var LEVELS = ['low', 'mode', 'high'];
+var COLORS = { 'low': '#e56524', 'mode': '#ed2236', 'high': '#881678' };
+var DURATION = 500;
+
 var TyphoonShape = function () {
   function TyphoonShape(cfg) {
     _classCallCheck(this, TyphoonShape);
@@ -15352,15 +15368,15 @@ var TyphoonShape = function () {
     this.data = cfg.data;
     this.canvas = cfg.canvas;
     this.radius = cfg.radius;
+    this.x = cfg.x;
+    this.y = cfg.y;
     this._init_();
   }
 
   TyphoonShape.prototype._init_ = function _init_() {
     var self = this;
     self.container = self.canvas.addGroup();
-    var x = self.canvas.get('width') / 2;
-    var y = self.canvas.get('height') / 2;
-    self.container.translate(x, y);
+    self.container.translate(self.x, self.y);
     self._initializeShape();
   };
 
@@ -15369,28 +15385,31 @@ var TyphoonShape = function () {
     self.data = data;
   };
 
+  TyphoonShape.prototype.moveTo = function moveTo(x, y) {
+    var self = this;
+    //heading
+    var dx = self.x - x;
+    var dy = self.y - y;
+    var angle = Math.atan2(dy, dx);
+    var mat = self.container.attr('matrix');
+    mat[0] = Math.cos(angle);
+    mat[1] = -Math.sin(angle);
+    mat[3] = Math.sin(angle);
+    mat[4] = Math.cos(angle);
+    //moving
+    /*const ulMatrix = [ 1, 0, 0,
+                       0, 1, 0, 
+                       x, y, 1 ];*/
+    var ulMatrix = [Math.cos(angle), -Math.sin(angle), 0, Math.sin(angle), Math.cos(angle), 0, x, y, 1];
+    self.container.stopAnimate();
+    self.container.animate({
+      matrix: ulMatrix
+    }, DURATION);
+  };
+
   TyphoonShape.prototype.update = function update() {
     var self = this;
-    var data = self._constructShapeData();
-    var dirs = ['ne', 'se', 'sw', 'nw'];
-    var levels = ['low', 'mode', 'high'];
-    var colors = { 'low': '#e56524', 'mode': '#ed2236', 'high': '#881678' };
-    //draw wings
-    for (var i = 0; i < levels.length; i++) {
-      var level = levels[i];
-      var vertices = self._windDirVertex(data[level]);
-      var c = colors[level];
-      for (var j = 0; j < dirs.length; j++) {
-        var dir = dirs[j];
-        var path = self._getShapePath(dir, vertices);
-        var shape = self[level + '_' + dir + '_wing'];
-        shape.animate({
-          path: path
-        }, 300, 'easeLinear');
-      }
-    }
-
-    self.canvas.draw();
+    self._updateShape();
   };
 
   TyphoonShape.prototype.clear = function clear() {};
@@ -15403,16 +15422,13 @@ var TyphoonShape = function () {
   TyphoonShape.prototype._initializeShape = function _initializeShape() {
     var self = this;
     var data = self._constructShapeData();
-    var dirs = ['ne', 'se', 'sw', 'nw'];
-    var levels = ['low', 'mode', 'high'];
-    var colors = { 'low': '#e56524', 'mode': '#ed2236', 'high': '#881678' };
     //draw wings
-    for (var i = 0; i < levels.length; i++) {
-      var level = levels[i];
+    for (var i = 0; i < LEVELS.length; i++) {
+      var level = LEVELS[i];
       var vertices = self._windDirVertex(data[level]);
-      var c = colors[level];
-      for (var j = 0; j < dirs.length; j++) {
-        var dir = dirs[j];
+      var c = COLORS[level];
+      for (var j = 0; j < DIRS.length; j++) {
+        var dir = DIRS[j];
         var path = self._getShapePath(dir, vertices);
         var shape = self.container.addShape('path', {
           attrs: {
@@ -15429,12 +15445,31 @@ var TyphoonShape = function () {
       attrs: {
         fill: 'white',
         stroke: '#646464',
-        lineWidth: 2,
+        lineWidth: 1,
         r: 5,
         x: 0,
-        y: -30
+        y: -self.radius / 3
       }
     });
+  };
+
+  TyphoonShape.prototype._updateShape = function _updateShape() {
+    var self = this;
+    var data = self._constructShapeData();
+    //draw wings
+    for (var i = 0; i < LEVELS.length; i++) {
+      var level = LEVELS[i];
+      var vertices = self._windDirVertex(data[level]);
+      var c = COLORS[level];
+      for (var j = 0; j < DIRS.length; j++) {
+        var dir = DIRS[j];
+        var path = self._getShapePath(dir, vertices);
+        var shape = self[level + '_' + dir + '_wing'];
+        shape.animate({
+          path: path
+        }, DURATION, 'easeLinear');
+      }
+    }
   };
 
   TyphoonShape.prototype._windDirVertex = function _windDirVertex(d) {

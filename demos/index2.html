@@ -27,10 +27,15 @@
   //initialize typhoon
   const tp = new typhoon({
     data:dataSample,
-    canvas:canvas
+    canvas:canvas,
+    position:{x:200,y:100}
   });
+  window.setTimeout(function(){
   tp.setData(dataSample2);
+  tp.setPosition(300,200);
   tp.update();
+  },2000);
+
 </script>
 
 </html>
