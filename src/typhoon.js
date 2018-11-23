@@ -18,8 +18,33 @@ class Typhoon {
     self.canvas.draw();
   }
 
-  update() {
+  setData(data) {
+    const self = this;
+    self.data = data;
+  }
 
+  update() {
+    const self = this;
+    const data = self._constructShapeData();
+    const dirs = ['ne', 'se', 'sw', 'nw'];
+    const levels = ['low', 'mode', 'high'];
+    const colors = { 'low': '#e56524', 'mode': '#ed2236', 'high': '#881678' };
+    //draw wings
+    for (let i = 0; i < levels.length; i++) {
+      const level = levels[i];
+      const vertices = self._windDirVertex(data[level]);
+      const c = colors[level];
+      for (let j = 0; j < dirs.length; j++) {
+        const dir = dirs[j];
+        const path = self._getShapePath(dir, vertices);
+        const shape = self[level + '_' + dir + '_wing'];
+        shape.animate({
+          path
+        }, 300, 'easeLinear');
+      }
+    }
+
+    self.canvas.draw();
   }
 
   clear() {
@@ -36,7 +61,7 @@ class Typhoon {
     const data = self._constructShapeData();
     const dirs = ['ne', 'se', 'sw', 'nw'];
     const levels = ['low', 'mode', 'high'];
-    const colors = {'low':'#e56524','mode':'#ed2236','high':'#881678'};
+    const colors = { 'low': '#e56524', 'mode': '#ed2236', 'high': '#881678' };
     //draw wings
     for (let i = 0; i < levels.length; i++) {
       const level = levels[i];
@@ -48,22 +73,22 @@ class Typhoon {
         const shape = self.container.addShape('path', {
           attrs: {
             path,
-            fill:c,
-            opacity:0.5
+            fill: c,
+            opacity: 0.5
           }
         });
         self[level + '_' + dir + '_wing'] = shape;
       }
     }
     //draw head
-    const head = self.container.addShape('circle',{
-      attrs:{
-        fill:'white',
-        stroke:'#646464',
-        lineWidth:2,
-        r:5,
-        x:0,
-        y:-30
+    const head = self.container.addShape('circle', {
+      attrs: {
+        fill: 'white',
+        stroke: '#646464',
+        lineWidth: 2,
+        r: 5,
+        x: 0,
+        y: -30
       }
     });
   }

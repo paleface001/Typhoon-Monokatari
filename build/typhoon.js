@@ -15314,7 +15314,34 @@ var Typhoon = function () {
     self.canvas.draw();
   };
 
-  Typhoon.prototype.update = function update() {};
+  Typhoon.prototype.setData = function setData(data) {
+    var self = this;
+    self.data = data;
+  };
+
+  Typhoon.prototype.update = function update() {
+    var self = this;
+    var data = self._constructShapeData();
+    var dirs = ['ne', 'se', 'sw', 'nw'];
+    var levels = ['low', 'mode', 'high'];
+    var colors = { 'low': '#e56524', 'mode': '#ed2236', 'high': '#881678' };
+    //draw wings
+    for (var i = 0; i < levels.length; i++) {
+      var level = levels[i];
+      var vertices = self._windDirVertex(data[level]);
+      var c = colors[level];
+      for (var j = 0; j < dirs.length; j++) {
+        var dir = dirs[j];
+        var path = self._getShapePath(dir, vertices);
+        var shape = self[level + '_' + dir + '_wing'];
+        shape.animate({
+          path: path
+        }, 300, 'easeLinear');
+      }
+    }
+
+    self.canvas.draw();
+  };
 
   Typhoon.prototype.clear = function clear() {};
 

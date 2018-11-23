@@ -14,7 +14,10 @@
 <script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.g2-3.3.2/dist/g2.min.js"></script>
 <script src="../build/typhoon.js"></script>
 <script>
-  const dataSample = {"date": {"year": "2015", "month": "07", "day": "14"}, "time": "12", "event": "  ", "status": "HU", "lat": "17.5N", "lng": "107.8W", "maxWind": 75, "minPressure": 980, "low_wind_ne": 120, "low_wind_se": 120, "low_wind_sw": 50, "low_wind_nw": 100, "mode_wind_ne": 60, "mode_wind_se": 40, "mode_wind_sw": 30, "mode_wind_nw": 40, "high_wind_ne": 20, "high_wind_se": 0, "high_wind_sw": 0, "high_wind_nw": 20};
+  const dataSample2 = {"date": {"year": "2015", "month": "07", "day": "14"}, "time": "12", "event": "  ", "status": "HU", "lat": "17.5N", "lng": "107.8W", "maxWind": 75, "minPressure": 980, "low_wind_ne": 120, "low_wind_se": 120, "low_wind_sw": 50, "low_wind_nw": 100, "mode_wind_ne": 60, "mode_wind_se": 40, "mode_wind_sw": 30, "mode_wind_nw": 40, "high_wind_ne": 20, "high_wind_se": 0, "high_wind_sw": 0, "high_wind_nw": 20};
+
+  const dataSample ={"date": {"year": "2015", "month": "09", "day": "07"}, "time": "12", "event": "  ", "status": "HU", "lat": "17.2N", "lng": "111.7W", "maxWind": 85, "minPressure": 976, "low_wind_ne": 100, "low_wind_se": 100, "low_wind_sw": 60, "low_wind_nw": 70, "mode_wind_ne": 40, "mode_wind_se": 40, "mode_wind_sw": 30, "mode_wind_nw": 40, "high_wind_ne": 20, "high_wind_se": 20, "high_wind_sw": 15, "high_wind_nw": 20};
+
   //create canvas
   const canvas = new G2.G.Canvas({
     containerId: 'typhoon',
@@ -27,6 +30,8 @@
     canvas:canvas,
     radius:200
   });
+  tp.setData(dataSample2);
+  tp.update();
 </script>
 
 </html>
