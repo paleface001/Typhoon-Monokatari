@@ -182,10 +182,6 @@ class TyphoonShape {
     }
   }
 
-  _calHeading(){
-    
-  }
-
   //data prcessing
   //construction
   _constructShapeData() {
@@ -206,7 +202,6 @@ class TyphoonShape {
     const min = 0;
     return (d - min) / (max - min) * self.radius;
   }
-
 
 }
 

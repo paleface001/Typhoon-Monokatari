@@ -15293,6 +15293,7 @@ module.exports = function (module) {
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Shape = __webpack_require__(4);
+var Routes = __webpack_require__(5);
 var G = __webpack_require__(0);
 
 var SIZE = 50;
@@ -15301,15 +15302,22 @@ var Typhoon = function () {
   function Typhoon(cfg) {
     _classCallCheck(this, Typhoon);
 
+    /* raw data for mapping*/
     this.data = cfg.data;
+    this.prevData = null;
     this.canvas = cfg.canvas;
     this.radius = cfg.radius;
     this.position = cfg.position ? cfg.position : { x: 0, y: 0 };
+    this.prevPosition = { x: null, y: null };
     this._init_();
   }
 
   Typhoon.prototype._init_ = function _init_() {
     var self = this;
+    self.routes = new Routes({
+      canvas: canvas
+    });
+
     self.shape = new Shape({
       data: dataSample,
       canvas: canvas,
@@ -15317,17 +15325,21 @@ var Typhoon = function () {
       x: self.position.x,
       y: self.position.y
     });
+
     self.canvas.draw();
   };
 
   Typhoon.prototype.setData = function setData(data) {
     var self = this;
+    self.prevData = self.data;
     self.data = data;
     self.shape.setData(data);
   };
 
   Typhoon.prototype.setPosition = function setPosition(x, y) {
     var self = this;
+    self.prevPosition.x = self.position.x;
+    self.prevPosition.y = self.position.y;
     self.position.x = x;
     self.position.y = y;
   };
@@ -15336,6 +15348,12 @@ var Typhoon = function () {
     var self = this;
     self.shape.update();
     self.shape.moveTo(self.position.x, self.position.y);
+    if (self.prevPosition.x && self.prevPosition.y) {
+      var routeData = { start: { x: self.prevPosition.x, y: self.prevPosition.y },
+        end: { x: self.position.x, y: self.position.y }
+      };
+      self.routes.addPath(routeData, self.data, self.prevData);
+    }
     self.canvas.draw();
   };
 
@@ -15513,8 +15531,6 @@ var TyphoonShape = function () {
     }
   };
 
-  TyphoonShape.prototype._calHeading = function _calHeading() {};
-
   //data prcessing
   //construction
 
@@ -15544,6 +15560,97 @@ var TyphoonShape = function () {
 }();
 
 module.exports = TyphoonShape;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var G = __webpack_require__(0);
+
+var POWER_COLOR = ['#f23c3e', '#f8812c', '#fdc52d', '#dacc76', '#bad1d3', '#dee2e6'];
+
+var TyphoonRoutes = function () {
+    function TyphoonRoutes(cfg) {
+        _classCallCheck(this, TyphoonRoutes);
+
+        this.canvas = cfg.canvas;
+        this._init_();
+    }
+
+    TyphoonRoutes.prototype._init_ = function _init_() {
+        var self = this;
+        self.container = self.canvas.addGroup();
+    };
+
+    /*route data should contains start & end position of the route and raw data for color mapping*/
+
+
+    TyphoonRoutes.prototype.addPath = function addPath(routeData, currentData, prevData) {
+        var self = this;
+        var prev_color = self._powerMapping(prevData.maxWind);
+        var current_color = self._powerMapping(currentData.maxWind);
+        //draw path
+        self.container.addShape('path', {
+            attrs: {
+                path: [['M', routeData.start.x, routeData.start.y], ['L', routeData.end.x, routeData.end.y]],
+                lineWidth: 10,
+                stroke: 'l(0) 0:' + prev_color + ' ' + '1:' + current_color,
+                strokeOpacity: 0.2,
+                lineCap: 'round'
+            }
+        });
+        //draw marker
+        self.container.addShape('circle', {
+            attrs: {
+                r: self._markerRadiusMapping(prevData.maxWind),
+                fill: prev_color,
+                fillOpacity: 0.5,
+                x: routeData.start.x,
+                y: routeData.start.y,
+                stroke: '#aaaaaa',
+                lineWidth: 1
+            }
+        });
+        self.container.addShape('circle', {
+            attrs: {
+                r: 2,
+                fill: '#000000',
+                fillOpacity: 0.5,
+                x: routeData.start.x,
+                y: routeData.start.y
+            }
+        });
+    };
+
+    //data mapping
+
+
+    TyphoonRoutes.prototype._powerMapping = function _powerMapping(value) {
+        var self = this;
+        var max_power = 165;
+        var min_power = 0;
+        var binNum = POWER_COLOR.length;
+        var step = (max_power - min_power) / binNum;
+        var binIndex = Math.floor(value / step);
+
+        return POWER_COLOR[binIndex];
+    };
+
+    TyphoonRoutes.prototype._markerRadiusMapping = function _markerRadiusMapping(value) {
+        var self = this;
+        var max_power = 165;
+        var min_power = 0;
+        var max_size = 10;
+        var min_size = 2.5;
+        return min_size + (value - min_power) / (max_power - min_power) * (max_size - min_size);
+    };
+
+    return TyphoonRoutes;
+}();
+
+module.exports = TyphoonRoutes;
 
 /***/ })
 /******/ ]);
