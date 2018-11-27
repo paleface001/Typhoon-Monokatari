@@ -3,7 +3,6 @@ const G = require('@antv/g');
 const DIRS = ['ne', 'se', 'sw', 'nw'];
 const LEVELS = ['low', 'mode', 'high'];
 const COLORS = { 'low': '#e56524', 'mode': '#ed2236', 'high': '#881678' };
-const DURATION = 500;
 
 class TyphoonShape {
   constructor(cfg) {
@@ -12,6 +11,7 @@ class TyphoonShape {
     this.radius = cfg.radius;
     this.x = cfg.x;
     this.y = cfg.y;
+    this.duartion = cfg.duartion;
     this._init_();
   }
 
@@ -30,25 +30,28 @@ class TyphoonShape {
   moveTo(x,y){
     const self = this;
     //heading
-    const dx = self.x - x;
+    /*const dx = self.x - x;
     const dy = self.y - y;
-    const angle = Math.atan2(dy,dx);
+    const angle = Math.atan2(dy,dx);*/
+    const dx = x - self.x;
+    const dy = y - self.y;
+    const angle = Math.atan(dy/dx) + Math.PI/2;
     const mat = self.container.attr('matrix');
     mat[0] = Math.cos(angle);
-    mat[1] = -Math.sin(angle);
-    mat[3] = Math.sin(angle);
+    mat[1] = Math.sin(angle);
+    mat[3] = -Math.sin(angle);
     mat[4] = Math.cos(angle);
     //moving
     /*const ulMatrix = [ 1, 0, 0,
-                       0, 1, 0, 
-                       x, y, 1 ];*/
-    const ulMatrix = [ Math.cos(angle), -Math.sin(angle), 0,
-                       Math.sin(angle), Math.cos(angle), 0, 
+                         0, 1, 0, 
+                         x, y, 1 ];*/
+    const ulMatrix = [ Math.cos(angle), Math.sin(angle), 0,
+                       -Math.sin(angle), Math.cos(angle), 0, 
                        x, y, 1 ];
     self.container.stopAnimate();
     self.container.animate({
       matrix: ulMatrix
-    },DURATION);
+    },self.duartion);
   }
   
   update() {
@@ -114,7 +117,7 @@ class TyphoonShape {
         const shape = self[level + '_' + dir + '_wing'];
         shape.animate({
           path
-        }, DURATION, 'easeLinear');
+        }, self.duartion, 'easeLinear');
       }
     }
   }

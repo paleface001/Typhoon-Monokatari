@@ -15296,7 +15296,8 @@ var Shape = __webpack_require__(4);
 var Routes = __webpack_require__(5);
 var G = __webpack_require__(0);
 
-var SIZE = 50;
+var SIZE = 40;
+var DURATION = 1000;
 
 var Typhoon = function () {
   function Typhoon(cfg) {
@@ -15315,15 +15316,17 @@ var Typhoon = function () {
   Typhoon.prototype._init_ = function _init_() {
     var self = this;
     self.routes = new Routes({
-      canvas: canvas
+      canvas: canvas,
+      duartion: DURATION
     });
 
     self.shape = new Shape({
-      data: dataSample,
+      data: self.data,
       canvas: canvas,
       radius: SIZE,
       x: self.position.x,
-      y: self.position.y
+      y: self.position.y,
+      duartion: DURATION
     });
 
     self.canvas.draw();
@@ -15377,7 +15380,6 @@ var G = __webpack_require__(0);
 var DIRS = ['ne', 'se', 'sw', 'nw'];
 var LEVELS = ['low', 'mode', 'high'];
 var COLORS = { 'low': '#e56524', 'mode': '#ed2236', 'high': '#881678' };
-var DURATION = 500;
 
 var TyphoonShape = function () {
   function TyphoonShape(cfg) {
@@ -15388,6 +15390,7 @@ var TyphoonShape = function () {
     this.radius = cfg.radius;
     this.x = cfg.x;
     this.y = cfg.y;
+    this.duartion = cfg.duartion;
     this._init_();
   }
 
@@ -15406,23 +15409,26 @@ var TyphoonShape = function () {
   TyphoonShape.prototype.moveTo = function moveTo(x, y) {
     var self = this;
     //heading
-    var dx = self.x - x;
-    var dy = self.y - y;
-    var angle = Math.atan2(dy, dx);
+    /*const dx = self.x - x;
+    const dy = self.y - y;
+    const angle = Math.atan2(dy,dx);*/
+    var dx = x - self.x;
+    var dy = y - self.y;
+    var angle = Math.atan(dy / dx) + Math.PI / 2;
     var mat = self.container.attr('matrix');
     mat[0] = Math.cos(angle);
-    mat[1] = -Math.sin(angle);
-    mat[3] = Math.sin(angle);
+    mat[1] = Math.sin(angle);
+    mat[3] = -Math.sin(angle);
     mat[4] = Math.cos(angle);
     //moving
     /*const ulMatrix = [ 1, 0, 0,
-                       0, 1, 0, 
-                       x, y, 1 ];*/
-    var ulMatrix = [Math.cos(angle), -Math.sin(angle), 0, Math.sin(angle), Math.cos(angle), 0, x, y, 1];
+                         0, 1, 0, 
+                         x, y, 1 ];*/
+    var ulMatrix = [Math.cos(angle), Math.sin(angle), 0, -Math.sin(angle), Math.cos(angle), 0, x, y, 1];
     self.container.stopAnimate();
     self.container.animate({
       matrix: ulMatrix
-    }, DURATION);
+    }, self.duartion);
   };
 
   TyphoonShape.prototype.update = function update() {
@@ -15485,7 +15491,7 @@ var TyphoonShape = function () {
         var shape = self[level + '_' + dir + '_wing'];
         shape.animate({
           path: path
-        }, DURATION, 'easeLinear');
+        }, self.duartion, 'easeLinear');
       }
     }
   };
@@ -15576,6 +15582,7 @@ var TyphoonRoutes = function () {
         _classCallCheck(this, TyphoonRoutes);
 
         this.canvas = cfg.canvas;
+        this.duartion = cfg.duartion;
         this._init_();
     }
 
@@ -15592,7 +15599,7 @@ var TyphoonRoutes = function () {
         var prev_color = self._powerMapping(prevData.maxWind);
         var current_color = self._powerMapping(currentData.maxWind);
         //draw path
-        self.container.addShape('path', {
+        var path = self.container.addShape('path', {
             attrs: {
                 path: [['M', routeData.start.x, routeData.start.y], ['L', routeData.end.x, routeData.end.y]],
                 lineWidth: 10,
@@ -15601,6 +15608,24 @@ var TyphoonRoutes = function () {
                 lineCap: 'round'
             }
         });
+        var bbox = path.getBBox();
+        var cliper = self.container.addShape('rect', {
+            attrs: {
+                x: bbox.minX,
+                y: bbox.minY,
+                width: 0,
+                height: bbox.maxY - bbox.minY,
+                opacity: 0
+            }
+        });
+        path.attr('clip', cliper);
+        cliper.animate({
+            width: bbox.maxX - bbox.minX
+        }, self.duartion, 'easeLinear', function () {
+            path.attr('clip', null);
+            cliper.remove();
+        });
+
         //draw marker
         self.container.addShape('circle', {
             attrs: {

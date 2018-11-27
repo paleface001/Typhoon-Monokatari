@@ -7,13 +7,32 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Typhoon Monikatari - test with map</title>
     <link rel="stylesheet" href="./style/style.css" type="text/css" />
+    <style>
+        #chart {
+            width: 1400px;
+            height: 728px;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+
+        #typhoon {
+            width: 1400px;
+            height: 728px;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+    </style>
 </head>
 
 <body>
     <div id="chart"></div>
+    <div id='typhoon'></div>
 </body>
 <script src="./assets/static/jquery-3.2.1.min.js"></script>
 <script src="http://d3js.org/topojson.v0.min.js"></script>
+<script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.g2-3.3.2/dist/g2.min.js"></script>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="../build/typhoon.js"></script>
 <script>
@@ -21,10 +40,10 @@
     var width = 1400,
         height = 1400 * ratio;
     var projection = d3.geo.mercator()
-        .center([-30, 20])
-        .scale(300)
+        .center([-70, 20])
+        .scale(2000)
         .rotate([-180, 0]);
-    var svg = d3.select("body").append("svg")
+    var svg = d3.select("#chart").append("svg")
         .attr("width", width)
         .attr("height", height);
     var path = d3.geo.path()
@@ -38,8 +57,50 @@
             .enter()
             .append("path")
             .attr("d", path)
-            .attr('fill','#e9ecef')
+            .attr('fill', '#e9ecef')
     });
+    //test typhoon data
+    const datas = [
+        {"date": {"year": "2010", "month": "06", "day": "20"}, "time": "12", "event": "  ", "status": "TS", "lat": 11.8, "lng": 99.4, "maxWind": 60, "minPressure": 991, "low_wind_ne": 60, "low_wind_se": 55, "low_wind_sw": 45, "low_wind_nw": 45, "mode_wind_ne": 10, "mode_wind_se": 0, "mode_wind_sw": 0, "mode_wind_nw": 10, "high_wind_ne": 0, "high_wind_se": 0, "high_wind_sw": 0, "high_wind_nw": 0}, 
+        {"date": {"year": "2010", "month": "06", "day": "20"}, "time": "18", "event": "  ", "status": "HU", "lat": 11.6, "lng": 100.0, "maxWind": 65, "minPressure": 987, "low_wind_ne": 65, "low_wind_se": 60, "low_wind_sw": 50, "low_wind_nw": 55, "mode_wind_ne": 30, "mode_wind_se": 30, "mode_wind_sw": 30, "mode_wind_nw": 30, "high_wind_ne": 15, "high_wind_se": 15, "high_wind_sw": 15, "high_wind_nw": 15}, 
+        {"date": {"year": "2010", "month": "06", "day": "21"}, "time": "", "event": "  ", "status": "HU", "lat": 11.5, "lng": 100.6, "maxWind": 65, "minPressure": 987, "low_wind_ne": 65, "low_wind_se": 60, "low_wind_sw": 50, "low_wind_nw": 55, "mode_wind_ne": 30, "mode_wind_se": 30, "mode_wind_sw": 30, "mode_wind_nw": 30, "high_wind_ne": 15, "high_wind_se": 15, "high_wind_sw": 15, "high_wind_nw": 15}, 
+        {"date": {"year": "2010", "month": "06", "day": "21"}, "time": "6", "event": "  ", "status": "HU", "lat": 11.5, "lng": 101.3, "maxWind": 65, "minPressure": 987, "low_wind_ne": 65, "low_wind_se": 60, "low_wind_sw": 50, "low_wind_nw": 60, "mode_wind_ne": 30, "mode_wind_se": 30, "mode_wind_sw": 30, "mode_wind_nw": 30, "high_wind_ne": 15, "high_wind_se": 15, "high_wind_sw": 15, "high_wind_nw": 15}, 
+        {"date": {"year": "2010", "month": "06", "day": "21"}, "time": "12", "event": "  ", "status": "HU", "lat": 11.5, "lng": 102.0, "maxWind": 70, "minPressure": 984, "low_wind_ne": 65, "low_wind_se": 60, "low_wind_sw": 50, "low_wind_nw": 65, "mode_wind_ne": 30, "mode_wind_se": 30, "mode_wind_sw": 30, "mode_wind_nw": 30, "high_wind_ne": 15, "high_wind_se": 15, "high_wind_sw": 15, "high_wind_nw": 15}, 
+        {"date": {"year": "2010", "month": "06", "day": "21"}, "time": "18", "event": "  ", "status": "HU", "lat": 11.6, "lng": 102.8, "maxWind": 75, "minPressure": 980, "low_wind_ne": 75, "low_wind_se": 65, "low_wind_sw": 60, "low_wind_nw": 75, "mode_wind_ne": 35, "mode_wind_se": 30, "mode_wind_sw": 30, "mode_wind_nw": 35, "high_wind_ne": 20, "high_wind_se": 15, "high_wind_sw": 15, "high_wind_nw": 20}, 
+        {"date": {"year": "2010", "month": "06", "day": "22"}, "time": "", "event": "  ", "status": "HU", "lat": 11.6, "lng": 103.6, "maxWind": 80, "minPressure": 977, "low_wind_ne": 80, "low_wind_se": 70, "low_wind_sw": 70, "low_wind_nw": 80, "mode_wind_ne": 45, "mode_wind_se": 30, "mode_wind_sw": 30, "mode_wind_nw": 45, "high_wind_ne": 20, "high_wind_se": 15, "high_wind_sw": 15, "high_wind_nw": 20},
+         {"date": {"year": "2010", "month": "06", "day": "22"}, "time": "6", "event": "  ", "status": "HU", "lat": 11.6, "lng": 104.4, "maxWind": 85, "minPressure": 973, "low_wind_ne": 80, "low_wind_se": 70, "low_wind_sw": 70, "low_wind_nw": 80, "mode_wind_ne": 45, "mode_wind_se": 30, "mode_wind_sw": 30, "mode_wind_nw": 45, "high_wind_ne": 20, "high_wind_se": 15, "high_wind_sw": 15, "high_wind_nw": 20}, 
+         {"date": {"year": "2010", "month": "06", "day": "22"}, "time": "12", "event": "  ", "status": "HU", "lat": 11.6, "lng": 105.2, "maxWind": 85, "minPressure": 973, "low_wind_ne": 80, "low_wind_se": 70, "low_wind_sw": 70, "low_wind_nw": 80, "mode_wind_ne": 45, "mode_wind_se": 30, "mode_wind_sw": 30, "mode_wind_nw": 45, "high_wind_ne": 20, "high_wind_se": 15, "high_wind_sw": 15, "high_wind_nw": 20}, 
+         {"date": {"year": "2010", "month": "06", "day": "22"}, "time": "18", "event": "  ", "status": "HU", "lat": 11.7, "lng": 106.0, "maxWind": 85, "minPressure": 973, "low_wind_ne": 80, "low_wind_se": 80, "low_wind_sw": 70, "low_wind_nw": 80, "mode_wind_ne": 45, "mode_wind_se": 30, "mode_wind_sw": 30, "mode_wind_nw": 45, "high_wind_ne": 20, "high_wind_se": 15, "high_wind_sw": 15, "high_wind_nw": 20}, 
+         {"date": {"year": "2010", "month": "06", "day": "23"}, "time": "", "event": "  ", "status": "HU", "lat": 11.7, "lng": 106.8, "maxWind": 80, "minPressure": 977, "low_wind_ne": 80, "low_wind_se": 80, "low_wind_sw": 70, "low_wind_nw": 80, "mode_wind_ne": 45, "mode_wind_se": 30, "mode_wind_sw": 30, "mode_wind_nw": 45, "high_wind_ne": 20, "high_wind_se": 15, "high_wind_sw": 15, "high_wind_nw": 20}, 
+         {"date": {"year": "2010", "month": "06", "day": "23"}, "time": "6", "event": "  ", "status": "HU", "lat": 11.8, "lng": 107.7, "maxWind": 75, "minPressure": 980, "low_wind_ne": 80, "low_wind_se": 80, "low_wind_sw": 70, "low_wind_nw": 80, "mode_wind_ne": 45, "mode_wind_se": 35, "mode_wind_sw": 30, "mode_wind_nw": 45, "high_wind_ne": 20, "high_wind_se": 15, "high_wind_sw": 15, "high_wind_nw": 20}, 
+         {"date": {"year": "2010", "month": "06", "day": "23"}, "time": "12", "event": "  ", "status": "HU", "lat": 12.0, "lng": 108.7, "maxWind": 85, "minPressure": 973, "low_wind_ne": 90, "low_wind_se": 90, "low_wind_sw": 75, "low_wind_nw": 90, "mode_wind_ne": 50, "mode_wind_se": 40, "mode_wind_sw": 35, "mode_wind_nw": 50, "high_wind_ne": 25, "high_wind_se": 20, "high_wind_sw": 20, "high_wind_nw": 25}, 
+         {"date": {"year": "2010", "month": "06", "day": "23"}, "time": "18", "event": "  ", "status": "HU", "lat": 12.1, "lng": 109.8, "maxWind": 95, "minPressure": 966, "low_wind_ne": 100, "low_wind_se": 100, "low_wind_sw": 85, "low_wind_nw": 100, "mode_wind_ne": 50, "mode_wind_se": 40, "mode_wind_sw": 35, "mode_wind_nw": 50, "high_wind_ne": 30, "high_wind_se": 25, "high_wind_sw": 25, "high_wind_nw": 30}, 
+         {"date": {"year": "2010", "month": "06", "day": "24"}, "time": "", "event": "  ", "status": "HU", "lat": 12.2, "lng": 111.0, "maxWind": 90, "minPressure": 970, "low_wind_ne": 100, "low_wind_se": 100, "low_wind_sw": 85, "low_wind_nw": 100, "mode_wind_ne": 55, "mode_wind_se": 45, "mode_wind_sw": 40, "mode_wind_nw": 55, "high_wind_ne": 25, "high_wind_se": 25, "high_wind_sw": 20, "high_wind_nw": 25}, {"date": {"year": "2010", "month": "06", "day": "24"}, "time": "6", "event": "  ", "status": "HU", "lat": 12.3, "lng": 112.1, "maxWind": 90, "minPressure": 970, "low_wind_ne": 100, "low_wind_se": 100, "low_wind_sw": 85, "low_wind_nw": 100, "mode_wind_ne": 55, "mode_wind_se": 45, "mode_wind_sw": 40, "mode_wind_nw": 55, "high_wind_ne": 25, "high_wind_se": 25, "high_wind_sw": 20, "high_wind_nw": 25}, {"date": {"year": "2010", "month": "06", "day": "24"}, "time": "12", "event": "  ", "status": "HU", "lat": 12.3, "lng": 113.3, "maxWind": 100, "minPressure": 962, "low_wind_ne": 100, "low_wind_se": 100, "low_wind_sw": 90, "low_wind_nw": 100, "mode_wind_ne": 60, "mode_wind_se": 60, "mode_wind_sw": 40, "mode_wind_nw": 55, "high_wind_ne": 35, "high_wind_se": 30, "high_wind_sw": 20, "high_wind_nw": 30}, {"date": {"year": "2010", "month": "06", "day": "24"}, "time": "18", "event": "  ", "status": "HU", "lat": 12.5, "lng": 114.3, "maxWind": 115, "minPressure": 948, "low_wind_ne": 100, "low_wind_se": 100, "low_wind_sw": 75, "low_wind_nw": 90, "mode_wind_ne": 70, "mode_wind_se": 60, "mode_wind_sw": 40, "mode_wind_nw": 60, "high_wind_ne": 40, "high_wind_se": 30, "high_wind_sw": 25, "high_wind_nw": 35}, {"date": {"year": "2010", "month": "06", "day": "25"}, "time": "", "event": "  ", "status": "HU", "lat": 12.9, "lng":115.4, "maxWind": 140, "minPressure": 921, "low_wind_ne": 120, "low_wind_se": 120, "low_wind_sw": 75, "low_wind_nw": 90, "mode_wind_ne": 75, "mode_wind_se": 60, "mode_wind_sw": 45, "mode_wind_nw": 60, "high_wind_ne": 45, "high_wind_se": 35, "high_wind_sw": 30, "high_wind_nw": 35}, {"date": {"year": "2010", "month": "06", "day": "25"}, "time": "6", "event": "  ", "status": "HU", "lat": 13.2, "lng": 116.5, "maxWind": 140, "minPressure": 921, "low_wind_ne": 120, "low_wind_se": 120, "low_wind_sw": 75, "low_wind_nw": 90, "mode_wind_ne": 75, "mode_wind_se": 60, "mode_wind_sw": 45, "mode_wind_nw": 60, "high_wind_ne": 45, "high_wind_se": 35, "high_wind_sw": 30, "high_wind_nw": 35}];
+    //create canvas
+    const canvas = new G2.G.Canvas({
+        containerId: 'typhoon',
+        width: $('#typhoon').width(),
+        height: $('#typhoon').height()
+    });
+    //initialize typhoon
+    const pos = projection([datas[0].lng,datas[0].lat]);
+    const tp = new typhoon({
+        data: datas[0],
+        canvas: canvas,
+        position: {x:pos[0],y:pos[1]}
+    });
+    let dataIndex = 1;
+    const interval = window.setInterval(function () {
+        const data = datas[dataIndex];
+        const pos = projection([data.lng,data.lat]);
+        tp.setData(data);
+        tp.setPosition(pos[0], pos[1]);
+        tp.update();
+        dataIndex += 2;
+        if(dataIndex>datas.length){
+            window.clearInterval(interval);
+        }
+    }, 1000);
 </script>
 
 </html>

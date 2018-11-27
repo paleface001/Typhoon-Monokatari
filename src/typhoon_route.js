@@ -5,6 +5,7 @@ const POWER_COLOR = ['#f23c3e', '#f8812c', '#fdc52d', '#dacc76', '#bad1d3', '#de
 class TyphoonRoutes {
     constructor(cfg) {
         this.canvas = cfg.canvas;
+        this.duartion = cfg.duartion;
         this._init_();
     }
 
@@ -19,7 +20,7 @@ class TyphoonRoutes {
         const prev_color = self._powerMapping(prevData.maxWind);
         const current_color = self._powerMapping(currentData.maxWind);
         //draw path
-        self.container.addShape('path',{
+        const path = self.container.addShape('path',{
             attrs:{
                 path:[
                     ['M',routeData.start.x,routeData.start.y],
@@ -31,6 +32,24 @@ class TyphoonRoutes {
                 lineCap:'round'
             }
         });
+        const bbox = path.getBBox();
+        const cliper = self.container.addShape('rect',{
+            attrs:{
+                x:bbox.minX,
+                y:bbox.minY,
+                width:0,
+                height:bbox.maxY - bbox.minY,
+                opacity:0
+            }
+        });
+        path.attr('clip',cliper);
+        cliper.animate({
+            width:bbox.maxX - bbox.minX
+          }, self.duartion, 'easeLinear',function(){
+              path.attr('clip',null);
+              cliper.remove();
+          });
+
         //draw marker
         self.container.addShape('circle',{
             attrs:{
@@ -52,7 +71,6 @@ class TyphoonRoutes {
                 y:routeData.start.y,
             }
         });
-
     }
 
 
