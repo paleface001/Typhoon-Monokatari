@@ -15296,7 +15296,7 @@ var Shape = __webpack_require__(4);
 var Routes = __webpack_require__(5);
 var G = __webpack_require__(0);
 
-var SIZE = 40;
+var SIZE = 50;
 var DURATION = 1000;
 
 var Typhoon = function () {
@@ -15316,13 +15316,13 @@ var Typhoon = function () {
   Typhoon.prototype._init_ = function _init_() {
     var self = this;
     self.routes = new Routes({
-      canvas: canvas,
+      canvas: self.canvas,
       duartion: DURATION
     });
 
     self.shape = new Shape({
       data: self.data,
-      canvas: canvas,
+      canvas: self.canvas,
       radius: SIZE,
       x: self.position.x,
       y: self.position.y,
@@ -15409,9 +15409,6 @@ var TyphoonShape = function () {
   TyphoonShape.prototype.moveTo = function moveTo(x, y) {
     var self = this;
     //heading
-    /*const dx = self.x - x;
-    const dy = self.y - y;
-    const angle = Math.atan2(dy,dx);*/
     var dx = x - self.x;
     var dy = y - self.y;
     var angle = Math.atan(dy / dx) + Math.PI / 2;
@@ -15608,45 +15605,52 @@ var TyphoonRoutes = function () {
                 lineCap: 'round'
             }
         });
-        var bbox = path.getBBox();
-        var cliper = self.container.addShape('rect', {
-            attrs: {
-                x: bbox.minX,
-                y: bbox.minY,
-                width: 0,
-                height: bbox.maxY - bbox.minY,
-                opacity: 0
+        /*const bbox = path.getBBox();
+        const cliper = self.container.addShape('rect',{
+            attrs:{
+                x:bbox.minX,
+                y:bbox.minY,
+                width:0,
+                height:bbox.maxY - bbox.minY,
+                opacity:0
             }
         });
-        path.attr('clip', cliper);
+        path.attr('clip',cliper);
         cliper.animate({
-            width: bbox.maxX - bbox.minX
-        }, self.duartion, 'easeLinear', function () {
-            path.attr('clip', null);
-            cliper.remove();
-        });
-
-        //draw marker
-        self.container.addShape('circle', {
-            attrs: {
-                r: self._markerRadiusMapping(prevData.maxWind),
-                fill: prev_color,
-                fillOpacity: 0.5,
-                x: routeData.start.x,
-                y: routeData.start.y,
-                stroke: '#aaaaaa',
-                lineWidth: 1
+            width:bbox.maxX - bbox.minX
+          }, self.duartion, 'easeLinear',function(){
+              path.attr('clip',null);
+              cliper.remove();
+          });
+         //draw marker
+        const outer_circle = self.container.addShape('circle',{
+            attrs:{
+                r:0,
+                fill:prev_color,
+                fillOpacity:0,
+                x:routeData.start.x,
+                y:routeData.start.y,
+                stroke:'#aaaaaa',
+                lineWidth:1
             }
         });
-        self.container.addShape('circle', {
-            attrs: {
-                r: 2,
-                fill: '#000000',
-                fillOpacity: 0.5,
-                x: routeData.start.x,
-                y: routeData.start.y
+        outer_circle.animate({
+            r:self._markerRadiusMapping(prevData.maxWind),
+            fillOpacity:0.5
+          }, 500, 'easeLinear');
+        
+        const inner_circle = self.container.addShape('circle',{
+            attrs:{
+                r:2,
+                fill:'#000000',
+                fillOpacity:0,
+                x:routeData.start.x,
+                y:routeData.start.y,
             }
         });
+        inner_circle.animate({
+            fillOpacity:0.5
+          }, 500, 'easeLinear');*/
     };
 
     //data mapping

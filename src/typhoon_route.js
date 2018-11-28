@@ -32,7 +32,7 @@ class TyphoonRoutes {
                 lineCap:'round'
             }
         });
-        const bbox = path.getBBox();
+        /*const bbox = path.getBBox();
         const cliper = self.container.addShape('rect',{
             attrs:{
                 x:bbox.minX,
@@ -51,26 +51,34 @@ class TyphoonRoutes {
           });
 
         //draw marker
-        self.container.addShape('circle',{
+        const outer_circle = self.container.addShape('circle',{
             attrs:{
-                r:self._markerRadiusMapping(prevData.maxWind),
+                r:0,
                 fill:prev_color,
-                fillOpacity:0.5,
+                fillOpacity:0,
                 x:routeData.start.x,
                 y:routeData.start.y,
                 stroke:'#aaaaaa',
                 lineWidth:1
             }
         });
-        self.container.addShape('circle',{
+        outer_circle.animate({
+            r:self._markerRadiusMapping(prevData.maxWind),
+            fillOpacity:0.5
+          }, 500, 'easeLinear');
+        
+        const inner_circle = self.container.addShape('circle',{
             attrs:{
                 r:2,
                 fill:'#000000',
-                fillOpacity:0.5,
+                fillOpacity:0,
                 x:routeData.start.x,
                 y:routeData.start.y,
             }
         });
+        inner_circle.animate({
+            fillOpacity:0.5
+          }, 500, 'easeLinear');*/
     }
 
 

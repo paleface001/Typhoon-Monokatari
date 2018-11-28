@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Typhoon Monikatari - test with map</title>
+    <link rel="stylesheet" href="./style/style.css" type="text/css" />
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+        #chart {
+            width: 1400px;
+            height: 728px;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+
+        #typhoon {
+            width: 1400px;
+            height: 728px;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="chart"></div>
+    <div id='typhoon'></div>
+</body>
+<script src="./assets/static/jquery-3.2.1.min.js"></script>
+<script src="http://d3js.org/topojson.v0.min.js"></script>
+<script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.g2-3.3.2/dist/g2.min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="../build/typhoon.js"></script>
+<script src="./js/main.js"></script>
+<script>
+    const ratio = 0.52;
+    var width = 1400,
+        height = 1400 * ratio;
+    var projection = d3.geo.mercator()
+        .center([-40, 20])
+        .scale(100)
+        .rotate([-180, 0]);
+    var svg = d3.select("#chart").append("svg")
+        .attr("width", width)
+        .attr("height", height);
+    var path = d3.geo.path()
+        .projection(projection);
+    var g = svg.append("g");
+    // load and display the World
+    d3.json("./data/world-110m2.json", function (error, topology) {
+        g.selectAll("path")
+            .data(topojson.object(topology, topology.objects.countries)
+                .geometries)
+            .enter()
+            .append("path")
+            .attr("d", path)
+            .attr('fill', '#e9ecef');
+    });
+    //load typhoon data
+    $.getJSON('./data/typhoon_round1.json', function (typhoonData) {
+        $.getJSON('./data/typhoon_round2.json', function (timeData) {
+            main(typhoonData,timeData,projection);
+        });
+    });
+</script>
+
+</html>

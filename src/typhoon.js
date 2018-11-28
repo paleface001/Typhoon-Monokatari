@@ -2,7 +2,7 @@ const Shape = require('./typhoon_shape');
 const Routes = require('./typhoon_route');
 const G = require('@antv/g');
 
-const  SIZE = 40;
+const  SIZE = 50;
 const DURATION = 1000;
 
 class Typhoon {
@@ -20,13 +20,13 @@ class Typhoon {
   _init_() {
     const self = this;
     self.routes = new Routes({
-      canvas,
+      canvas:self.canvas,
       duartion:DURATION
     });
 
     self.shape = new Shape({
       data:self.data,
-      canvas:canvas,
+      canvas:self.canvas,
       radius:SIZE,
       x:self.position.x,
       y:self.position.y,

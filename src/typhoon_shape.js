@@ -30,9 +30,6 @@ class TyphoonShape {
   moveTo(x,y){
     const self = this;
     //heading
-    /*const dx = self.x - x;
-    const dy = self.y - y;
-    const angle = Math.atan2(dy,dx);*/
     const dx = x - self.x;
     const dy = y - self.y;
     const angle = Math.atan(dy/dx) + Math.PI/2;
