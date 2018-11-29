@@ -15297,7 +15297,7 @@ var Routes = __webpack_require__(5);
 var G = __webpack_require__(0);
 
 var SIZE = 50;
-var DURATION = 1000;
+var DURATION = 500;
 
 var Typhoon = function () {
   function Typhoon(cfg) {
@@ -15336,7 +15336,7 @@ var Typhoon = function () {
     var self = this;
     self.prevData = self.data;
     self.data = data;
-    self.shape.setData(data);
+    //self.shape.setData(data);
   };
 
   Typhoon.prototype.setPosition = function setPosition(x, y) {
@@ -15349,8 +15349,8 @@ var Typhoon = function () {
 
   Typhoon.prototype.update = function update() {
     var self = this;
-    self.shape.update();
-    self.shape.moveTo(self.position.x, self.position.y);
+    //self.shape.update();
+    //self.shape.moveTo(self.position.x,self.position.y);
     if (self.prevPosition.x && self.prevPosition.y) {
       var routeData = { start: { x: self.prevPosition.x, y: self.prevPosition.y },
         end: { x: self.position.x, y: self.position.y }
@@ -15378,8 +15378,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var G = __webpack_require__(0);
 
 var DIRS = ['ne', 'se', 'sw', 'nw'];
-var LEVELS = ['low', 'mode', 'high'];
-var COLORS = { 'low': '#e56524', 'mode': '#ed2236', 'high': '#881678' };
 
 var TyphoonShape = function () {
   function TyphoonShape(cfg) {
@@ -15442,25 +15440,40 @@ var TyphoonShape = function () {
 
   TyphoonShape.prototype._initializeShape = function _initializeShape() {
     var self = this;
-    var data = self._constructShapeData();
-    //draw wings
-    for (var i = 0; i < LEVELS.length; i++) {
-      var level = LEVELS[i];
-      var vertices = self._windDirVertex(data[level]);
-      var c = COLORS[level];
-      for (var j = 0; j < DIRS.length; j++) {
-        var dir = DIRS[j];
-        var path = self._getShapePath(dir, vertices);
-        var shape = self.container.addShape('path', {
-          attrs: {
-            path: path,
-            fill: c,
-            opacity: 0.5
-          }
-        });
-        self[level + '_' + dir + '_wing'] = shape;
+    var vertices = self._windDirVertex();
+    var left_upper_path = [['M', vertices.c.x, vertices.c.y], ['L', vertices.ne.x, vertices.ne.y], ['A', self.radius / 2, self.radius / 2, 0, 0, 1, vertices.c.x, vertices.c.y], ['Z']];
+    self.left_upper_wing = self.container.addShape('path', {
+      attrs: {
+        path: left_upper_path,
+        fill: 'blue',
+        opacity: 0.7
       }
-    }
+    });
+    var left_lower_path = [['M', vertices.c.x, vertices.c.y], ['L', vertices.se.x, vertices.se.y], ['A', self.radius / 2, self.radius / 2, 0, 0, 0, vertices.c.x, vertices.c.y], ['Z']];
+    self.left_lower_wing = self.container.addShape('path', {
+      attrs: {
+        path: left_lower_path,
+        fill: 'blue',
+        opacity: 0.7
+      }
+    });
+    var right_upper_path = [['M', vertices.c.x, vertices.c.y], ['L', vertices.nw.x, vertices.nw.y], ['A', self.radius / 2, self.radius / 2, 0, 0, 0, vertices.c.x, vertices.c.y], ['Z']];
+    self.right_upper_wing = self.container.addShape('path', {
+      attrs: {
+        path: right_upper_path,
+        fill: 'blue',
+        opacity: 0.7
+      }
+    });
+    var right_lower_path = [['M', vertices.c.x, vertices.c.y], ['L', vertices.sw.x, vertices.sw.y], ['A', self.radius / 2, self.radius / 2, 0, 0, 1, vertices.c.x, vertices.c.y], ['Z']];
+    self.right_lower_wing = self.container.addShape('path', {
+      attrs: {
+        path: right_lower_path,
+        fill: 'blue',
+        opacity: 0.7
+      }
+    });
+
     //draw head
     var head = self.container.addShape('circle', {
       attrs: {
@@ -15469,7 +15482,7 @@ var TyphoonShape = function () {
         lineWidth: 1,
         r: 5,
         x: 0,
-        y: -self.radius / 3
+        y: -self.radius / 2
       }
     });
   };
@@ -15493,17 +15506,17 @@ var TyphoonShape = function () {
     }
   };
 
-  TyphoonShape.prototype._windDirVertex = function _windDirVertex(d) {
+  TyphoonShape.prototype._windDirVertex = function _windDirVertex() {
     var self = this;
     var startAngle = -90 * Math.PI / 180;
-    var ne_angle = startAngle + 45 * Math.PI / 180;
-    var nw_angle = startAngle + 315 * Math.PI / 180;
-    var se_angle = startAngle + 135 * Math.PI / 180;
-    var sw_angle = startAngle + 225 * Math.PI / 180;
-    var ne = self._getVertexPosition(ne_angle, d.ne);
-    var nw = self._getVertexPosition(nw_angle, d.nw);
-    var se = self._getVertexPosition(se_angle, d.se);
-    var sw = self._getVertexPosition(sw_angle, d.sw);
+    var ne_angle = startAngle + 30 * Math.PI / 180;
+    var nw_angle = startAngle + 330 * Math.PI / 180;
+    var se_angle = startAngle + 150 * Math.PI / 180;
+    var sw_angle = startAngle + 210 * Math.PI / 180;
+    var ne = self._getVertexPosition(ne_angle, self.radius);
+    var nw = self._getVertexPosition(nw_angle, self.radius);
+    var se = self._getVertexPosition(se_angle, self.radius * 0.95);
+    var sw = self._getVertexPosition(sw_angle, self.radius * 0.95);
 
     var c = { x: 0, y: 0 };
     var w = { x: -self.radius, y: 0 };
@@ -15514,9 +15527,8 @@ var TyphoonShape = function () {
     return { ne: ne, nw: nw, se: se, sw: sw, w: w, e: e, n: n, s: s, c: c };
   };
 
-  TyphoonShape.prototype._getVertexPosition = function _getVertexPosition(angle, d) {
+  TyphoonShape.prototype._getVertexPosition = function _getVertexPosition(angle, radius) {
     var self = this;
-    var radius = self._getRaidus(d);
     var x = Math.cos(angle) * radius;
     var y = Math.sin(angle) * radius;
     return { x: x, y: y };
@@ -15535,20 +15547,6 @@ var TyphoonShape = function () {
   };
 
   //data prcessing
-  //construction
-
-
-  TyphoonShape.prototype._constructShapeData = function _constructShapeData() {
-    var self = this;
-    //low
-    var low = { ne: self.data.low_wind_ne, se: self.data.low_wind_se, sw: self.data.low_wind_sw, nw: self.data.low_wind_nw };
-    //mode
-    var mode = { ne: self.data.mode_wind_ne, se: self.data.mode_wind_se, sw: self.data.mode_wind_sw, nw: self.data.mode_wind_nw };
-    //high
-    var high = { ne: self.data.high_wind_ne, se: self.data.high_wind_se, sw: self.data.high_wind_sw, nw: self.data.high_wind_nw };
-    return { low: low, mode: mode, high: high };
-  };
-
   //mapping
 
 
@@ -15593,22 +15591,22 @@ var TyphoonRoutes = function () {
 
     TyphoonRoutes.prototype.addPath = function addPath(routeData, currentData, prevData) {
         var self = this;
-        var prev_color = self._powerMapping(prevData.maxWind);
-        var current_color = self._powerMapping(currentData.maxWind);
+        var prev_color = self._powerMapping(prevData.level);
+        var current_color = self._powerMapping(currentData.level);
         //draw path
+        var dir = routeData.end.x - routeData.start.x;
         var path = self.container.addShape('path', {
             attrs: {
                 path: [['M', routeData.start.x, routeData.start.y], ['L', routeData.end.x, routeData.end.y]],
-                lineWidth: 10,
-                stroke: 'l(0) 0:' + prev_color + ' ' + '1:' + current_color,
-                strokeOpacity: 0.2,
-                lineCap: 'round'
+                lineWidth: 4,
+                stroke: dir > 0 ? 'l(0) 0:' + prev_color + ' ' + '1:' + current_color : 'l(0) 0:' + current_color + ' ' + '1:' + prev_color,
+                strokeOpacity: 0.5
             }
         });
         /*const bbox = path.getBBox();
         const cliper = self.container.addShape('rect',{
             attrs:{
-                x:bbox.minX,
+                x:(dir<0)?bbox.maxX:bbox.minX,
                 y:bbox.minY,
                 width:0,
                 height:bbox.maxY - bbox.minY,
@@ -15616,41 +15614,30 @@ var TyphoonRoutes = function () {
             }
         });
         path.attr('clip',cliper);
-        cliper.animate({
-            width:bbox.maxX - bbox.minX
-          }, self.duartion, 'easeLinear',function(){
+        const attr = {width:bbox.width};
+        if(dir<0){
+            attr.x = bbox.minX;
+        }
+        cliper.animate(attr, self.duartion, 'easeLinear',function(){
               path.attr('clip',null);
               cliper.remove();
-          });
-         //draw marker
-        const outer_circle = self.container.addShape('circle',{
-            attrs:{
-                r:0,
-                fill:prev_color,
-                fillOpacity:0,
-                x:routeData.start.x,
-                y:routeData.start.y,
-                stroke:'#aaaaaa',
-                lineWidth:1
+          });*/
+        self._adaptiveClipper(routeData.start, routeData.end, path);
+
+        //draw marker
+        var outer_circle = self.container.addShape('circle', {
+            attrs: {
+                r: 0,
+                fill: prev_color,
+                fillOpacity: 0,
+                x: routeData.start.x,
+                y: routeData.start.y
             }
         });
         outer_circle.animate({
-            r:self._markerRadiusMapping(prevData.maxWind),
-            fillOpacity:0.5
-          }, 500, 'easeLinear');
-        
-        const inner_circle = self.container.addShape('circle',{
-            attrs:{
-                r:2,
-                fill:'#000000',
-                fillOpacity:0,
-                x:routeData.start.x,
-                y:routeData.start.y,
-            }
-        });
-        inner_circle.animate({
-            fillOpacity:0.5
-          }, 500, 'easeLinear');*/
+            r: self._markerRadiusMapping(prevData.level),
+            fillOpacity: 0.5
+        }, 500, 'easeLinear');
     };
 
     //data mapping
@@ -15658,10 +15645,10 @@ var TyphoonRoutes = function () {
 
     TyphoonRoutes.prototype._powerMapping = function _powerMapping(value) {
         var self = this;
-        var max_power = 165;
-        var min_power = 0;
+        var max_level = 9;
+        var min_level = 0;
         var binNum = POWER_COLOR.length;
-        var step = (max_power - min_power) / binNum;
+        var step = (max_level - min_level) / binNum;
         var binIndex = Math.floor(value / step);
 
         return POWER_COLOR[binIndex];
@@ -15669,11 +15656,63 @@ var TyphoonRoutes = function () {
 
     TyphoonRoutes.prototype._markerRadiusMapping = function _markerRadiusMapping(value) {
         var self = this;
-        var max_power = 165;
-        var min_power = 0;
+        var max_level = 9;
+        var min_level = 0;
         var max_size = 10;
-        var min_size = 2.5;
-        return min_size + (value - min_power) / (max_power - min_power) * (max_size - min_size);
+        var min_size = 2;
+        return min_size + (value - min_level) / (max_level - min_level) * (max_size - min_size);
+    };
+
+    TyphoonRoutes.prototype._adaptiveClipper = function _adaptiveClipper(start, end, target) {
+        var self = this;
+        //step 1: x-direction or y-direction
+        var dir = void 0;
+        var dx = end.x - start.x;
+        var dy = end.y - start.y;
+        if (Math.abs(dx) > Math.abs(dy)) {
+            dir = 'x';
+        } else {
+            dir = 'y';
+        }
+        //step 2: create and bind clipper
+        var bbox = target.getBBox();
+        var clipperAttr = void 0;
+        if (dir === 'x') {
+            clipperAttr = {
+                x: dx < 0 ? bbox.maxX : bbox.minX,
+                y: bbox.minY,
+                width: 0,
+                height: bbox.height,
+                opacity: 0
+            };
+        } else {
+            clipperAttr = {
+                x: bbox.minX,
+                y: dy < 0 ? bbox.maxY : bbox.minY,
+                width: bbox.width,
+                height: 0,
+                opacity: 0
+            };
+        }
+        var cliper = self.container.addShape('rect', {
+            attrs: clipperAttr
+        });
+        target.attr('clip', cliper);
+        //construct animation attributes
+        var attr = {};
+        if (dir === 'x') {
+            attr.width = bbox.width;
+            if (dx < 0) attr.x = bbox.minX;
+        }
+        if (dir === 'y') {
+            attr.height = bbox.height;
+            if (dy < 0) attr.y = bbox.minY;
+        }
+        //animate
+        cliper.animate(attr, self.duartion, 'easeLinear', function () {
+            target.attr('clip', null);
+            cliper.remove();
+        });
     };
 
     return TyphoonRoutes;
