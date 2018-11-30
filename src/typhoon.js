@@ -8,6 +8,7 @@ const DURATION = 500;
 class Typhoon {
   constructor(cfg) {
     /* raw data for mapping*/
+    this.id = cfg.id;
     this.data = cfg.data; 
     this.prevData = null;
     this.canvas = cfg.canvas;
@@ -25,6 +26,7 @@ class Typhoon {
     });
 
     self.shape = new Shape({
+      id:self.id,
       data:self.data,
       canvas:self.canvas,
       radius:SIZE,
@@ -40,7 +42,7 @@ class Typhoon {
     const self = this;
     self.prevData = self.data;
     self.data = data;
-    //self.shape.setData(data);
+    self.shape.setData(data);
   }
 
   setPosition(x,y){
@@ -53,8 +55,8 @@ class Typhoon {
 
   update() {
     const self = this;
-    //self.shape.update();
-    //self.shape.moveTo(self.position.x,self.position.y);
+    self.shape.update();
+    self.shape.moveTo(self.position.x,self.position.y);
     if(self.prevPosition.x && self.prevPosition.y){
       const routeData = {start:{x:self.prevPosition.x,y:self.prevPosition.y},
                          end:{x:self.position.x,y:self.position.y}
@@ -69,7 +71,9 @@ class Typhoon {
   }
 
   destory() {
-
+    const self = this;
+    self.shape.destory();
+    self.routes.destory();
   }
 
 }

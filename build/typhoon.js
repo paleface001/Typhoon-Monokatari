@@ -15304,6 +15304,7 @@ var Typhoon = function () {
     _classCallCheck(this, Typhoon);
 
     /* raw data for mapping*/
+    this.id = cfg.id;
     this.data = cfg.data;
     this.prevData = null;
     this.canvas = cfg.canvas;
@@ -15321,6 +15322,7 @@ var Typhoon = function () {
     });
 
     self.shape = new Shape({
+      id: self.id,
       data: self.data,
       canvas: self.canvas,
       radius: SIZE,
@@ -15336,7 +15338,7 @@ var Typhoon = function () {
     var self = this;
     self.prevData = self.data;
     self.data = data;
-    //self.shape.setData(data);
+    self.shape.setData(data);
   };
 
   Typhoon.prototype.setPosition = function setPosition(x, y) {
@@ -15349,8 +15351,8 @@ var Typhoon = function () {
 
   Typhoon.prototype.update = function update() {
     var self = this;
-    //self.shape.update();
-    //self.shape.moveTo(self.position.x,self.position.y);
+    self.shape.update();
+    self.shape.moveTo(self.position.x, self.position.y);
     if (self.prevPosition.x && self.prevPosition.y) {
       var routeData = { start: { x: self.prevPosition.x, y: self.prevPosition.y },
         end: { x: self.position.x, y: self.position.y }
@@ -15362,7 +15364,11 @@ var Typhoon = function () {
 
   Typhoon.prototype.clear = function clear() {};
 
-  Typhoon.prototype.destory = function destory() {};
+  Typhoon.prototype.destory = function destory() {
+    var self = this;
+    self.shape.destory();
+    self.routes.destory();
+  };
 
   return Typhoon;
 }();
@@ -15378,11 +15384,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var G = __webpack_require__(0);
 
 var DIRS = ['ne', 'se', 'sw', 'nw'];
+var POWER_COLOR = ['#bad1d3', '#dacc76', '#fdc52d', '#f8812c', '#f23c3e'];
 
 var TyphoonShape = function () {
   function TyphoonShape(cfg) {
     _classCallCheck(this, TyphoonShape);
 
+    this.id = cfg.id;
     this.data = cfg.data;
     this.canvas = cfg.canvas;
     this.radius = cfg.radius;
@@ -15429,23 +15437,47 @@ var TyphoonShape = function () {
   TyphoonShape.prototype.update = function update() {
     var self = this;
     self._updateShape();
+    self.head.attr('y', -self.radius - 5);
   };
 
   TyphoonShape.prototype.clear = function clear() {};
 
-  TyphoonShape.prototype.destory = function destory() {};
+  TyphoonShape.prototype.destory = function destory() {
+    var self = this;
+    var children = self.container.get('children');
+    for (var i = 0; i < children.length; i++) {
+      var element = children[i];
+      element.animate({
+        opacity: 0
+      }, 1000, 'easeLinear');
+    }
+  };
 
   //wind shape generate
 
 
   TyphoonShape.prototype._initializeShape = function _initializeShape() {
     var self = this;
-    var vertices = self._windDirVertex();
+    var vertices = self._windDirVertex(self.data);
+    //draw wings
+    /*for (let i = 0; i < DIRS.length; i++) {
+      const dir = DIRS[i];
+      const path = self._getShapePath(dir, vertices);
+      const shape = self.container.addShape('path', {
+        attrs: {
+          path,
+          fill: '#ccc',
+          opacity: 1
+        }
+      });
+      self[dir + '_wing'] = shape;
+    }*/
+    var color = self._powerMapping(self.data.level);
     var left_upper_path = [['M', vertices.c.x, vertices.c.y], ['L', vertices.ne.x, vertices.ne.y], ['A', self.radius / 2, self.radius / 2, 0, 0, 1, vertices.c.x, vertices.c.y], ['Z']];
     self.left_upper_wing = self.container.addShape('path', {
       attrs: {
         path: left_upper_path,
-        fill: 'blue',
+        fill: color,
         opacity: 0.7
       }
     });
@@ -15453,7 +15485,7 @@ var TyphoonShape = function () {
     self.left_lower_wing = self.container.addShape('path', {
       attrs: {
         path: left_lower_path,
-        fill: 'blue',
+        fill: color,
         opacity: 0.7
       }
     });
@@ -15461,7 +15493,7 @@ var TyphoonShape = function () {
     self.right_upper_wing = self.container.addShape('path', {
       attrs: {
         path: right_upper_path,
-        fill: 'blue',
+        fill: color,
         opacity: 0.7
       }
     });
@@ -15469,54 +15501,75 @@ var TyphoonShape = function () {
     self.right_lower_wing = self.container.addShape('path', {
       attrs: {
         path: right_lower_path,
-        fill: 'blue',
+        fill: color,
         opacity: 0.7
       }
     });
-
     //draw head
-    var head = self.container.addShape('circle', {
+    self.head = self.container.addShape('text', {
       attrs: {
-        fill: 'white',
-        stroke: '#646464',
-        lineWidth: 1,
-        r: 5,
+        text: self.id,
+        fontSize: 12,
+        fill: 'black',
+        stroke: 'white',
+        lineWidth: 2,
+        textAlign: 'center',
+        textBaseline: 'middle',
         x: 0,
-        y: -self.radius / 2
+        y: -self.radius - 20
       }
     });
   };
 
   TyphoonShape.prototype._updateShape = function _updateShape() {
     var self = this;
-    var data = self._constructShapeData();
+    //mapping shape
+
+    var vertices = self._windDirVertex(self.data);
+    var color = self._powerMapping(self.data.level);
     //draw wings
-    for (var i = 0; i < LEVELS.length; i++) {
-      var level = LEVELS[i];
-      var vertices = self._windDirVertex(data[level]);
-      var c = COLORS[level];
-      for (var j = 0; j < DIRS.length; j++) {
-        var dir = DIRS[j];
-        var path = self._getShapePath(dir, vertices);
-        var shape = self[level + '_' + dir + '_wing'];
-        shape.animate({
-          path: path
-        }, self.duartion, 'easeLinear');
-      }
-    }
+    /*for (let i = 0; i < DIRS.length; i++) {
+      const dir = DIRS[i];
+      const path = self._getShapePath(dir, vertices);
+      const shape = self[dir + '_wing'];
+      shape.animate({
+        path
+      }, self.duartion, 'easeLinear');
+    }*/
+    var left_upper_path = [['M', vertices.c.x, vertices.c.y], ['L', vertices.ne.x, vertices.ne.y], ['A', self.radius / 10, self.radius / 10, 0, 0, 1, vertices.c.x, vertices.c.y], ['Z']];
+    self.left_upper_wing.animate({
+      fill: color,
+      path: left_upper_path
+    }, self.duartion, 'easeLinear');
+    var left_lower_path = [['M', vertices.c.x, vertices.c.y], ['L', vertices.se.x, vertices.se.y], ['A', self.radius / 10, self.radius / 10, 0, 0, 0, vertices.c.x, vertices.c.y], ['Z']];
+    self.left_lower_wing.animate({
+      fill: color,
+      path: left_lower_path
+    }, self.duartion, 'easeLinear');
+    var right_upper_path = [['M', vertices.c.x, vertices.c.y], ['L', vertices.nw.x, vertices.nw.y], ['A', self.radius / 10, self.radius / 10, 0, 0, 0, vertices.c.x, vertices.c.y], ['Z']];
+    self.right_upper_wing.animate({
+      fill: color,
+      path: right_upper_path
+    }, self.duartion, 'easeLinear');
+    var right_lower_path = [['M', vertices.c.x, vertices.c.y], ['L', vertices.sw.x, vertices.sw.y], ['A', self.radius / 10, self.radius / 10, 0, 0, 1, vertices.c.x, vertices.c.y], ['Z']];
+    self.right_lower_wing.animate({
+      fill: color,
+      path: right_lower_path
+    }, self.duartion, 'easeLinear');
   };
 
-  TyphoonShape.prototype._windDirVertex = function _windDirVertex() {
+  TyphoonShape.prototype._windDirVertex = function _windDirVertex(d) {
     var self = this;
+    var level = d.level;
     var startAngle = -90 * Math.PI / 180;
-    var ne_angle = startAngle + 30 * Math.PI / 180;
-    var nw_angle = startAngle + 330 * Math.PI / 180;
-    var se_angle = startAngle + 150 * Math.PI / 180;
-    var sw_angle = startAngle + 210 * Math.PI / 180;
-    var ne = self._getVertexPosition(ne_angle, self.radius);
-    var nw = self._getVertexPosition(nw_angle, self.radius);
-    var se = self._getVertexPosition(se_angle, self.radius * 0.95);
-    var sw = self._getVertexPosition(sw_angle, self.radius * 0.95);
+    var ne_angle = startAngle + 45 * Math.PI / 180;
+    var nw_angle = startAngle + 315 * Math.PI / 180;
+    var se_angle = startAngle + 135 * Math.PI / 180;
+    var sw_angle = startAngle + 225 * Math.PI / 180;
+    var ne = self._getVertexPosition(ne_angle, level);
+    var nw = self._getVertexPosition(nw_angle, level);
+    var se = self._getVertexPosition(se_angle, level);
+    var sw = self._getVertexPosition(sw_angle, level);
 
     var c = { x: 0, y: 0 };
     var w = { x: -self.radius, y: 0 };
@@ -15527,10 +15580,11 @@ var TyphoonShape = function () {
     return { ne: ne, nw: nw, se: se, sw: sw, w: w, e: e, n: n, s: s, c: c };
   };
 
-  TyphoonShape.prototype._getVertexPosition = function _getVertexPosition(angle, radius) {
+  TyphoonShape.prototype._getVertexPosition = function _getVertexPosition(angle, d) {
     var self = this;
-    var x = Math.cos(angle) * radius;
-    var y = Math.sin(angle) * radius;
+    self.radius = self._getRaidus(d);
+    var x = Math.cos(angle) * self.radius;
+    var y = Math.sin(angle) * self.radius;
     return { x: x, y: y };
   };
 
@@ -15546,15 +15600,26 @@ var TyphoonShape = function () {
     }
   };
 
-  //data prcessing
   //mapping
 
 
   TyphoonShape.prototype._getRaidus = function _getRaidus(d) {
     var self = this;
-    var max = 150;
+    var max = 10;
     var min = 0;
-    return (d - min) / (max - min) * self.radius;
+    var max_size = 30;
+    var min_size = 10;
+    return min_size + (d - min) / (max - min) * (max_size - min_size);
+  };
+
+  TyphoonShape.prototype._powerMapping = function _powerMapping(value) {
+    var self = this;
+    var max_level = 10;
+    var min_level = 0;
+    var binNum = POWER_COLOR.length;
+    var step = (max_level - min_level) / binNum;
+    var binIndex = Math.floor(value / step);
+    return POWER_COLOR[binIndex];
   };
 
   return TyphoonShape;
@@ -15570,7 +15635,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var G = __webpack_require__(0);
 
-var POWER_COLOR = ['#f23c3e', '#f8812c', '#fdc52d', '#dacc76', '#bad1d3', '#dee2e6'];
+var POWER_COLOR = ['#bad1d3', '#dacc76', '#fdc52d', '#f8812c', '#f23c3e'];
 
 var TyphoonRoutes = function () {
     function TyphoonRoutes(cfg) {
@@ -15584,6 +15649,8 @@ var TyphoonRoutes = function () {
     TyphoonRoutes.prototype._init_ = function _init_() {
         var self = this;
         self.container = self.canvas.addGroup();
+        self.pathes = self.container.addGroup();
+        self.points = self.container.addGroup();
     };
 
     /*route data should contains start & end position of the route and raw data for color mapping*/
@@ -15595,49 +15662,48 @@ var TyphoonRoutes = function () {
         var current_color = self._powerMapping(currentData.level);
         //draw path
         var dir = routeData.end.x - routeData.start.x;
-        var path = self.container.addShape('path', {
+        var path = self.pathes.addShape('path', {
             attrs: {
                 path: [['M', routeData.start.x, routeData.start.y], ['L', routeData.end.x, routeData.end.y]],
-                lineWidth: 4,
+                lineWidth: self._lineWidthMapping(currentData.level),
                 stroke: dir > 0 ? 'l(0) 0:' + prev_color + ' ' + '1:' + current_color : 'l(0) 0:' + current_color + ' ' + '1:' + prev_color,
-                strokeOpacity: 0.5
+                lineCap: 'round'
             }
         });
-        /*const bbox = path.getBBox();
-        const cliper = self.container.addShape('rect',{
-            attrs:{
-                x:(dir<0)?bbox.maxX:bbox.minX,
-                y:bbox.minY,
-                width:0,
-                height:bbox.maxY - bbox.minY,
-                opacity:0
-            }
-        });
-        path.attr('clip',cliper);
-        const attr = {width:bbox.width};
-        if(dir<0){
-            attr.x = bbox.minX;
-        }
-        cliper.animate(attr, self.duartion, 'easeLinear',function(){
-              path.attr('clip',null);
-              cliper.remove();
-          });*/
         self._adaptiveClipper(routeData.start, routeData.end, path);
-
         //draw marker
-        var outer_circle = self.container.addShape('circle', {
-            attrs: {
-                r: 0,
-                fill: prev_color,
-                fillOpacity: 0,
-                x: routeData.start.x,
-                y: routeData.start.y
-            }
-        });
-        outer_circle.animate({
-            r: self._markerRadiusMapping(prevData.level),
-            fillOpacity: 0.5
-        }, 500, 'easeLinear');
+        if (self.level !== currentData.level) {
+            var outer_circle = self.points.addShape('circle', {
+                attrs: {
+                    r: 0,
+                    fill: prev_color,
+                    fillOpacity: 0,
+                    x: routeData.start.x,
+                    y: routeData.start.y,
+                    stroke: '#eef2f5',
+                    lineWidth: 2
+                }
+            });
+            outer_circle.animate({
+                r: self._markerRadiusMapping(prevData.level),
+                fillOpacity: 1
+            }, 500, 'easeLinear');
+        }
+
+        self.level = currentData.level;
+    };
+
+    TyphoonRoutes.prototype.destory = function destory() {
+        var self = this;
+        self.points.remove();
+        var pathes = self.pathes.get('children');
+        for (var i = 0; i < pathes.length; i++) {
+            var path = pathes[i];
+            path.animate({
+                lineWidth: 1,
+                opacity: 0.4
+            }, 1000, 'easeLinear');
+        }
     };
 
     //data mapping
@@ -15645,21 +15711,29 @@ var TyphoonRoutes = function () {
 
     TyphoonRoutes.prototype._powerMapping = function _powerMapping(value) {
         var self = this;
-        var max_level = 9;
+        var max_level = 10;
         var min_level = 0;
         var binNum = POWER_COLOR.length;
         var step = (max_level - min_level) / binNum;
         var binIndex = Math.floor(value / step);
-
         return POWER_COLOR[binIndex];
     };
 
     TyphoonRoutes.prototype._markerRadiusMapping = function _markerRadiusMapping(value) {
         var self = this;
-        var max_level = 9;
+        var max_level = 10;
         var min_level = 0;
         var max_size = 10;
         var min_size = 2;
+        return min_size + (value - min_level) / (max_level - min_level) * (max_size - min_size);
+    };
+
+    TyphoonRoutes.prototype._lineWidthMapping = function _lineWidthMapping(value) {
+        var self = this;
+        var max_level = 10;
+        var min_level = 0;
+        var max_size = 4;
+        var min_size = 1;
         return min_size + (value - min_level) / (max_level - min_level) * (max_size - min_size);
     };
 
@@ -15694,11 +15768,11 @@ var TyphoonRoutes = function () {
                 opacity: 0
             };
         }
-        var cliper = self.container.addShape('rect', {
+        var cliper = self.pathes.addShape('rect', {
             attrs: clipperAttr
         });
         target.attr('clip', cliper);
-        //construct animation attributes
+        //step 3: construct animation attributes
         var attr = {};
         if (dir === 'x') {
             attr.width = bbox.width;
@@ -15708,7 +15782,7 @@ var TyphoonRoutes = function () {
             attr.height = bbox.height;
             if (dy < 0) attr.y = bbox.minY;
         }
-        //animate
+        //step 4: animate
         cliper.animate(attr, self.duartion, 'easeLinear', function () {
             target.attr('clip', null);
             cliper.remove();

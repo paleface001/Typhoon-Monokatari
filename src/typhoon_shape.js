@@ -1,9 +1,11 @@
 const G = require('@antv/g');
 
 const DIRS = ['ne', 'se', 'sw', 'nw'];
+const POWER_COLOR = ['#bad1d3','#dacc76','#fdc52d','#f8812c','#f23c3e'];
 
 class TyphoonShape {
   constructor(cfg) {
+    this.id = cfg.id;
     this.data = cfg.data;
     this.canvas = cfg.canvas;
     this.radius = cfg.radius;
@@ -25,12 +27,12 @@ class TyphoonShape {
     self.data = data;
   }
 
-  moveTo(x,y){
+  moveTo(x, y) {
     const self = this;
     //heading
     const dx = x - self.x;
     const dy = y - self.y;
-    const angle = Math.atan(dy/dx) + Math.PI/2;
+    const angle = Math.atan(dy / dx) + Math.PI / 2;
     const mat = self.container.attr('matrix');
     mat[0] = Math.cos(angle);
     mat[1] = Math.sin(angle);
@@ -40,32 +42,54 @@ class TyphoonShape {
     /*const ulMatrix = [ 1, 0, 0,
                          0, 1, 0, 
                          x, y, 1 ];*/
-    const ulMatrix = [ Math.cos(angle), Math.sin(angle), 0,
-                       -Math.sin(angle), Math.cos(angle), 0, 
-                       x, y, 1 ];
+    const ulMatrix = [Math.cos(angle), Math.sin(angle), 0,
+    -Math.sin(angle), Math.cos(angle), 0,
+      x, y, 1];
     self.container.stopAnimate();
     self.container.animate({
       matrix: ulMatrix
-    },self.duartion);
+    }, self.duartion);
   }
-  
+
   update() {
     const self = this;
-    self._updateShape(); 
+    self._updateShape();
+    self.head.attr('y',-self.radius - 5);
   }
 
   clear() {
-
+    
   }
 
   destory() {
-
+    const self = this;
+    const children = self.container.get('children');
+    for(let i=0; i<children.length; i++){
+      const element = children[i];
+      element.animate({
+        opacity:0
+    }, 1000, 'easeLinear');
+    }
   }
 
   //wind shape generate
   _initializeShape() {
     const self = this;
-    const vertices = self._windDirVertex();
+    const vertices = self._windDirVertex(self.data);
+    //draw wings
+    /*for (let i = 0; i < DIRS.length; i++) {
+      const dir = DIRS[i];
+      const path = self._getShapePath(dir, vertices);
+      const shape = self.container.addShape('path', {
+        attrs: {
+          path,
+          fill: '#ccc',
+          opacity: 1
+        }
+      });
+      self[dir + '_wing'] = shape;
+    }*/
+    const color = self._powerMapping(self.data.level);
     const left_upper_path = [
       ['M',vertices.c.x,vertices.c.y],
       ['L',vertices.ne.x,vertices.ne.y],
@@ -75,7 +99,7 @@ class TyphoonShape {
     self.left_upper_wing = self.container.addShape('path',{
       attrs:{
         path:left_upper_path,
-        fill:'blue',
+        fill:color,
         opacity:0.7
       }
     });
@@ -88,7 +112,7 @@ class TyphoonShape {
     self.left_lower_wing = self.container.addShape('path',{
       attrs:{
         path:left_lower_path,
-        fill:'blue',
+        fill:color,
         opacity:0.7
       }
     });
@@ -101,7 +125,7 @@ class TyphoonShape {
     self.right_upper_wing = self.container.addShape('path',{
       attrs:{
         path:right_upper_path,
-        fill:'blue',
+        fill:color,
         opacity:0.7
       }
     });
@@ -114,56 +138,96 @@ class TyphoonShape {
     self.right_lower_wing = self.container.addShape('path',{
       attrs:{
         path:right_lower_path,
-        fill:'blue',
+        fill:color,
         opacity:0.7
       }
     });
-    
     //draw head
-    const head = self.container.addShape('circle', {
+    self.head = self.container.addShape('text', {
       attrs: {
-        fill: 'white',
-        stroke: '#646464',
-        lineWidth: 1,
-        r: 5,
-        x: 0,
-        y: -self.radius/2
+        text:self.id,
+        fontSize:12,
+        fill:'black',
+        stroke:'white',
+        lineWidth:2,
+        textAlign:'center',
+        textBaseline:'middle',
+        x:0,
+        y:-self.radius - 20
       }
     });
   }
 
 
-  _updateShape(){
+  _updateShape() {
     const self = this;
-    const data = self._constructShapeData();
+    //mapping shape
+
+    const vertices = self._windDirVertex(self.data);
+    const color = self._powerMapping(self.data.level);
     //draw wings
-    for (let i = 0; i < LEVELS.length; i++) {
-      const level = LEVELS[i];
-      const vertices = self._windDirVertex(data[level]);
-      const c = COLORS[level];
-      for (let j = 0; j < DIRS.length; j++) {
-        const dir = DIRS[j];
-        const path = self._getShapePath(dir, vertices);
-        const shape = self[level + '_' + dir + '_wing'];
-        shape.animate({
-          path
-        }, self.duartion, 'easeLinear');
-      }
-    }
+    /*for (let i = 0; i < DIRS.length; i++) {
+      const dir = DIRS[i];
+      const path = self._getShapePath(dir, vertices);
+      const shape = self[dir + '_wing'];
+      shape.animate({
+        path
+      }, self.duartion, 'easeLinear');
+    }*/
+    const left_upper_path = [
+      ['M',vertices.c.x,vertices.c.y],
+      ['L',vertices.ne.x,vertices.ne.y],
+      ['A',self.radius/10,self.radius/10,0,0,1,vertices.c.x,vertices.c.y],
+      ['Z']
+    ];
+    self.left_upper_wing.animate({
+      fill:color,
+      path:left_upper_path
+    }, self.duartion, 'easeLinear');
+    const left_lower_path = [
+      ['M',vertices.c.x,vertices.c.y],
+      ['L',vertices.se.x,vertices.se.y],
+      ['A',self.radius/10,self.radius/10,0,0,0,vertices.c.x,vertices.c.y],
+      ['Z']
+    ];
+    self.left_lower_wing.animate({
+      fill:color,
+      path:left_lower_path
+    }, self.duartion, 'easeLinear');
+    const right_upper_path = [
+      ['M',vertices.c.x,vertices.c.y],
+      ['L',vertices.nw.x,vertices.nw.y],
+      ['A',self.radius/10,self.radius/10,0,0,0,vertices.c.x,vertices.c.y],
+      ['Z']
+    ];
+    self.right_upper_wing.animate({
+      fill:color,
+      path:right_upper_path
+    }, self.duartion, 'easeLinear');
+    const right_lower_path = [
+      ['M',vertices.c.x,vertices.c.y],
+      ['L',vertices.sw.x,vertices.sw.y],
+      ['A',self.radius/10,self.radius/10,0,0,1,vertices.c.x,vertices.c.y],
+      ['Z']
+    ];
+    self.right_lower_wing.animate({
+      fill:color,
+      path:right_lower_path
+    }, self.duartion, 'easeLinear');
   }
 
-
-  _windDirVertex() {
+  _windDirVertex(d) {
     const self = this;
+    const level = d.level;
     const startAngle = -90 * Math.PI / 180;
-    const ne_angle = startAngle + 30 * Math.PI / 180;
-    const nw_angle = startAngle + 330 * Math.PI / 180;
-    const se_angle = startAngle + 150 * Math.PI / 180;
-    const sw_angle = startAngle + 210 * Math.PI / 180;
-    const ne = self._getVertexPosition(ne_angle,self.radius);
-    const nw = self._getVertexPosition(nw_angle,self.radius);
-    const se = self._getVertexPosition(se_angle,self.radius*0.95);
-    const sw = self._getVertexPosition(sw_angle,self.radius*0.95);
+    const ne_angle = startAngle + 45 * Math.PI / 180;
+    const nw_angle = startAngle + 315 * Math.PI / 180;
+    const se_angle = startAngle + 135 * Math.PI / 180;
+    const sw_angle = startAngle + 225 * Math.PI / 180;
+    const ne = self._getVertexPosition(ne_angle, level);
+    const nw = self._getVertexPosition(nw_angle, level);
+    const se = self._getVertexPosition(se_angle, level);
+    const sw = self._getVertexPosition(sw_angle, level);
 
     const c = { x: 0, y: 0 };
     const w = { x: -self.radius, y: 0 };
@@ -175,10 +239,11 @@ class TyphoonShape {
   }
 
 
-  _getVertexPosition(angle,radius) {
+  _getVertexPosition(angle, d) {
     const self = this;
-    const x = Math.cos(angle) * radius;
-    const y = Math.sin(angle) * radius;
+    self.radius = self._getRaidus(d);
+    const x = Math.cos(angle) * self.radius;
+    const y = Math.sin(angle) * self.radius;
     return { x, y };
   }
 
@@ -214,14 +279,26 @@ class TyphoonShape {
     }
   }
 
-  //data prcessing
+
   //mapping
   _getRaidus(d) {
     const self = this;
-    const max = 150;
+    const max = 10;
     const min = 0;
-    return (d - min) / (max - min) * self.radius;
+    const max_size = 30;
+    const min_size = 10;
+    return min_size + (d - min) / (max - min) * (max_size - min_size);
   }
+
+  _powerMapping(value) {
+    const self = this;
+    const max_level = 10;
+    const min_level = 0;
+    const binNum = POWER_COLOR.length;
+    const step = (max_level - min_level) / binNum;
+    const binIndex = Math.floor(value / step);
+    return POWER_COLOR[binIndex];
+}
 
 }
 

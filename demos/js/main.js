@@ -6,6 +6,7 @@ const startStamp = Date.parse(startTime);
 const endStamp = Date.parse(endTime);
 const step = 1000 * 60 * 60 * 12; //每六小时
 let current = startStamp;
+let currentName;
 const typhoons = {};
 const canvas = new G2.G.Canvas({
     containerId: 'typhoon',
@@ -25,10 +26,12 @@ const interval = window.setInterval(function(){
 
 function readData(timeString){
     const currentData = timeData[timeString];
+    const typhoonNames = [];
     if(currentData.length > 0){
-        const output = [];
+        const output = [];        
         for(let i =0; i<currentData.length; i++){
             const id = currentData[i].id;
+            typhoonNames.push(id);
             const index = currentData[i].dataIndex;
             const data = typhoonData[id][index];
             if(typhoons.hasOwnProperty(id)){
@@ -40,6 +43,7 @@ function readData(timeString){
             }else{
                 const pos = projection([data.lng,data.lat]);
                 const tp = new typhoon({
+                    id,
                     data,
                     canvas,
                     position: {x:pos[0],y:pos[1]}
@@ -48,7 +52,20 @@ function readData(timeString){
             }
         }
     }
+    checkTyphoons(typhoonNames);                             
 }
+
+function checkTyphoons(namelist){
+    for(let key in typhoons){
+        if( namelist.indexOf(key)<0 ){
+            const tp = typhoons[key];
+            window.setTimeout(function(){
+                tp.destory();
+            },200);
+        }   
+    }
+}
+
 
 }//end of main
 

@@ -10,6 +10,7 @@
     <style>
         body {
             overflow: hidden;
+            background-color: #eef2f5;
         }
 
         #chart {
@@ -62,7 +63,7 @@
             .enter()
             .append("path")
             .attr("d", path)
-            .attr('fill', '#e9ecef');
+            .attr('fill', 'white');
     });
     //load typhoon data
     $.getJSON('data/pacific_typhoon_2017.json', function (typhoonData) {
