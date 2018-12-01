@@ -1,12 +1,11 @@
 //tempo timeline
 function main(typhoonData,timeData,projection){
-const startTime = '2017-09-12 00:00:00';
+const startTime = '2017-07-10 00:00:00';
 const endTime = '2017-12-31 12:00:00';
 const startStamp = Date.parse(startTime);
 const endStamp = Date.parse(endTime);
 const step = 1000 * 60 * 60 * 12; //每六小时
 let current = startStamp;
-let currentName;
 const typhoons = {};
 const canvas = new G2.G.Canvas({
     containerId: 'typhoon',
@@ -14,6 +13,7 @@ const canvas = new G2.G.Canvas({
     height: $('#typhoon').height(),
     renderer:'svg'
 });
+const mountainContainer = canvas.addGroup();
 const interval = window.setInterval(function(){
     if (current < endStamp) {
         current += step;
@@ -28,8 +28,7 @@ const interval = window.setInterval(function(){
 function readData(timeString){
     const currentData = timeData[timeString];
     const typhoonNames = [];
-    if(currentData.length > 0){
-        const output = [];        
+    if(currentData.length > 0){       
         for(let i =0; i<currentData.length; i++){
             const id = currentData[i].id;
             typhoonNames.push(id);
@@ -66,6 +65,8 @@ function checkTyphoons(namelist){
         }   
     }
 }
+
+
 
 
 }//end of main

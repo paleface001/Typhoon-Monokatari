@@ -15359,6 +15359,10 @@ var Typhoon = function () {
       };
       self.routes.addPath(routeData, self.data, self.prevData);
     }
+    //if landfall
+    if (self.data.hasOwnProperty('landfall')) {
+      self._onLandfall();
+    }
     self.canvas.draw();
   };
 
@@ -15368,6 +15372,50 @@ var Typhoon = function () {
     var self = this;
     self.shape.destory();
     self.routes.destory();
+  };
+
+  Typhoon.prototype._onLandfall = function _onLandfall() {
+    var self = this;
+    var width = 10;
+    var height = self._SpeedHeightMapping(self.data.maxSpeed);
+    var color = self._SpeedColorMapping(self.data.maxSpeed);
+    var initial_path = [['M', self.position.x - width / 2, self.position.y], ['L', self.position.x + width / 2, self.position.y], ['L', self.position.x, self.position.y], ['Z']];
+    var path = [['M', self.position.x - width / 2, self.position.y], ['L', self.position.x + width / 2, self.position.y], ['L', self.position.x, self.position.y - height], ['Z']];
+    var mountain = self.canvas.addShape('path', {
+      attrs: {
+        path: initial_path,
+        fill: color,
+        opacity: 0,
+        zIndex: 10000
+      }
+    });
+    //animate
+    mountain.animate({
+      path: path,
+      opacity: 1
+    }, 1000, 'easeLinear');
+  };
+
+  //data mapping
+
+
+  Typhoon.prototype._SpeedHeightMapping = function _SpeedHeightMapping(value) {
+    var max_speed = 50;
+    var min_speed = 10;
+    var max_size = 200;
+    var min_size = 0;
+    return min_size + (value - min_speed) / (max_speed - min_speed) * (max_size - min_size);
+  };
+
+  Typhoon.prototype._SpeedColorMapping = function _SpeedColorMapping(value) {
+    var max_speed = 40;
+    var min_speed = 10;
+    var max_color = [228, 24, 136];
+    var min_color = [31, 179, 236];
+    var r = min_color[0] + (value - min_speed) / (max_speed - min_speed) * (max_color[0] - min_color[0]);
+    var g = min_color[1] + (value - min_speed) / (max_speed - min_speed) * (max_color[1] - min_color[1]);
+    var b = min_color[2] + (value - min_speed) / (max_speed - min_speed) * (max_color[2] - min_color[2]);
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
   };
 
   return Typhoon;
@@ -15736,6 +15784,9 @@ var TyphoonRoutes = function () {
         var min_size = 1;
         return min_size + (value - min_level) / (max_level - min_level) * (max_size - min_size);
     };
+
+    //clipping animation
+
 
     TyphoonRoutes.prototype._adaptiveClipper = function _adaptiveClipper(start, end, target) {
         var self = this;

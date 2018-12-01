@@ -99,7 +99,8 @@ class TyphoonRoutes {
         const min_size = 1;
         return min_size + (value - min_level) / (max_level - min_level) * (max_size - min_size);
     }
-
+    
+    //clipping animation
     _adaptiveClipper(start, end, target) {
         const self = this;
         //step 1: x-direction or y-direction

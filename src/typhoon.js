@@ -63,6 +63,10 @@ class Typhoon {
                         };
       self.routes.addPath(routeData,self.data, self.prevData);
     }
+    //if landfall
+    if(self.data.hasOwnProperty('landfall')){
+      self._onLandfall();
+    }
     self.canvas.draw();
   }
 
@@ -74,6 +78,58 @@ class Typhoon {
     const self = this;
     self.shape.destory();
     self.routes.destory();
+  }
+
+  _onLandfall(){
+    const self = this;
+    const width = 10;
+    const height = self._SpeedHeightMapping(self.data.maxSpeed);
+    const color = self._SpeedColorMapping(self.data.maxSpeed);
+    const initial_path = [
+      ['M',self.position.x - width/2, self.position.y],
+      ['L',self.position.x + width/2, self.position.y],
+      ['L',self.position.x, self.position.y],
+      ['Z']
+    ];
+    const path =  [
+      ['M',self.position.x - width/2, self.position.y],
+      ['L',self.position.x + width/2, self.position.y],
+      ['L',self.position.x, self.position.y - height],
+      ['Z']
+    ];
+    const mountain = self.canvas.addShape('path',{
+      attrs:{
+        path:initial_path,
+        fill:color,
+        opacity:0,
+        zIndex:10000
+      }
+    });
+    //animate
+    mountain.animate({
+      path,
+      opacity:1
+    }, 1000, 'easeLinear');
+  }
+
+  //data mapping
+  _SpeedHeightMapping(value){
+    const max_speed = 50;
+    const min_speed = 10;
+    const max_size = 200;
+    const min_size = 0;
+    return min_size + (value - min_speed) / (max_speed - min_speed) * (max_size - min_size);
+  }
+
+  _SpeedColorMapping(value){
+    const max_speed = 40;
+    const min_speed = 10;
+    const max_color = [228,24,136];
+    const min_color = [31,179,236];
+    const r = min_color[0] + (value - min_speed) / (max_speed - min_speed) * (max_color[0] - min_color[0]);
+    const g = min_color[1] + (value - min_speed) / (max_speed - min_speed) * (max_color[1] - min_color[1]);
+    const b = min_color[2] + (value - min_speed) / (max_speed - min_speed) * (max_color[2] - min_color[2]);
+    return  'rgb('+r+','+g+','+b+')';
   }
 
 }
