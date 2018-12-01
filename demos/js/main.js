@@ -1,6 +1,6 @@
 //tempo timeline
 function main(typhoonData,timeData,projection){
-const startTime = '2017-07-10 00:00:00';
+const startTime = '2017-09-12 00:00:00';
 const endTime = '2017-12-31 12:00:00';
 const startStamp = Date.parse(startTime);
 const endStamp = Date.parse(endTime);
@@ -18,6 +18,7 @@ const interval = window.setInterval(function(){
     if (current < endStamp) {
         current += step;
         const timeString = _toTimeString(current);
+        $('#time').text(timeString);
         readData(timeString);
       } else {
         clearInterval(interval);
