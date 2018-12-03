@@ -19,8 +19,10 @@ class TyphoonRoutes {
     /*route data should contains start & end position of the route and raw data for color mapping*/
     addPath(routeData, currentData, prevData) {
         const self = this;
+        self.routeData = routeData;
         const prev_color = self._powerMapping(prevData.level);
         const current_color = self._powerMapping(currentData.level);
+        self.color = current_color;
         //draw path
         const dir = routeData.end.x - routeData.start.x;
         const path = self.pathes.addShape('path', {
@@ -52,13 +54,12 @@ class TyphoonRoutes {
                 r: self._markerRadiusMapping(prevData.level),
                 fillOpacity: 1
             }, 500, 'easeLinear');
-
         }
 
         self.level = currentData.level;
     }
 
-    destory(){
+    hide(){
         const self = this;
         self.points.remove();
         const pathes = self.pathes.get('children');
@@ -69,6 +70,18 @@ class TyphoonRoutes {
                 opacity:0.4
             }, 1000, 'easeLinear');
         }
+    }
+
+    destory(){
+        
+    }
+
+    getEdgeData(){
+        const self = this;
+        const nodes = [{x:self.routeData.start.x,y:self.routeData.start.y},
+                       {x:self.routeData.end.x,y:self.routeData.end.y}];
+        const link = {source:nodes[0],target:nodes[1],color:self.color};
+        return {nodes:nodes,link:link};
     }
 
     //data mapping
@@ -95,8 +108,8 @@ class TyphoonRoutes {
         const self = this;
         const max_level = 10;
         const min_level = 0;
-        const max_size = 4;
-        const min_size = 1;
+        const max_size = 6;
+        const min_size = 2;
         return min_size + (value - min_level) / (max_level - min_level) * (max_size - min_size);
     }
     

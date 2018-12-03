@@ -15297,7 +15297,7 @@ var Routes = __webpack_require__(5);
 var G = __webpack_require__(0);
 
 var SIZE = 50;
-var DURATION = 500;
+var DURATION = 300;
 
 var Typhoon = function () {
   function Typhoon(cfg) {
@@ -15366,17 +15366,20 @@ var Typhoon = function () {
     self.canvas.draw();
   };
 
-  Typhoon.prototype.clear = function clear() {};
-
-  Typhoon.prototype.destory = function destory() {
+  Typhoon.prototype.hide = function hide() {
     var self = this;
-    self.shape.destory();
-    self.routes.destory();
+    self.shape.hide();
+    self.routes.hide();
+  };
+
+  Typhoon.prototype.clear = function clear() {
+    this.canvas.clear();
+    this.canvas.draw();
   };
 
   Typhoon.prototype._onLandfall = function _onLandfall() {
     var self = this;
-    var width = 10;
+    var width = 20;
     var height = self._SpeedHeightMapping(self.data.maxSpeed);
     var color = self._SpeedColorMapping(self.data.maxSpeed);
     var initial_path = [['M', self.position.x - width / 2, self.position.y], ['L', self.position.x + width / 2, self.position.y], ['L', self.position.x, self.position.y], ['Z']];
@@ -15384,7 +15387,7 @@ var Typhoon = function () {
     var mountain = self.canvas.addShape('path', {
       attrs: {
         path: initial_path,
-        fill: color,
+        fill: 'l(90) 0:rgba(' + color + ',1)' + ' ' + '1:rgba(' + color + ',0)',
         opacity: 0,
         zIndex: 10000
       }
@@ -15415,7 +15418,7 @@ var Typhoon = function () {
     var r = min_color[0] + (value - min_speed) / (max_speed - min_speed) * (max_color[0] - min_color[0]);
     var g = min_color[1] + (value - min_speed) / (max_speed - min_speed) * (max_color[1] - min_color[1]);
     var b = min_color[2] + (value - min_speed) / (max_speed - min_speed) * (max_color[2] - min_color[2]);
-    return 'rgb(' + r + ',' + g + ',' + b + ')';
+    return r + ',' + g + ',' + b;
   };
 
   return Typhoon;
@@ -15488,9 +15491,7 @@ var TyphoonShape = function () {
     self.head.attr('y', -self.radius - 5);
   };
 
-  TyphoonShape.prototype.clear = function clear() {};
-
-  TyphoonShape.prototype.destory = function destory() {
+  TyphoonShape.prototype.hide = function hide() {
     var self = this;
     var children = self.container.get('children');
     for (var i = 0; i < children.length; i++) {
@@ -15655,8 +15656,8 @@ var TyphoonShape = function () {
     var self = this;
     var max = 10;
     var min = 0;
-    var max_size = 30;
-    var min_size = 10;
+    var max_size = 40;
+    var min_size = 15;
     return min_size + (d - min) / (max - min) * (max_size - min_size);
   };
 
@@ -15706,8 +15707,10 @@ var TyphoonRoutes = function () {
 
     TyphoonRoutes.prototype.addPath = function addPath(routeData, currentData, prevData) {
         var self = this;
+        self.routeData = routeData;
         var prev_color = self._powerMapping(prevData.level);
         var current_color = self._powerMapping(currentData.level);
+        self.color = current_color;
         //draw path
         var dir = routeData.end.x - routeData.start.x;
         var path = self.pathes.addShape('path', {
@@ -15741,7 +15744,7 @@ var TyphoonRoutes = function () {
         self.level = currentData.level;
     };
 
-    TyphoonRoutes.prototype.destory = function destory() {
+    TyphoonRoutes.prototype.hide = function hide() {
         var self = this;
         self.points.remove();
         var pathes = self.pathes.get('children');
@@ -15752,6 +15755,15 @@ var TyphoonRoutes = function () {
                 opacity: 0.4
             }, 1000, 'easeLinear');
         }
+    };
+
+    TyphoonRoutes.prototype.destory = function destory() {};
+
+    TyphoonRoutes.prototype.getEdgeData = function getEdgeData() {
+        var self = this;
+        var nodes = [{ x: self.routeData.start.x, y: self.routeData.start.y }, { x: self.routeData.end.x, y: self.routeData.end.y }];
+        var link = { source: nodes[0], target: nodes[1], color: self.color };
+        return { nodes: nodes, link: link };
     };
 
     //data mapping
@@ -15780,8 +15792,8 @@ var TyphoonRoutes = function () {
         var self = this;
         var max_level = 10;
         var min_level = 0;
-        var max_size = 4;
-        var min_size = 1;
+        var max_size = 6;
+        var min_size = 2;
         return min_size + (value - min_level) / (max_level - min_level) * (max_size - min_size);
     };
 

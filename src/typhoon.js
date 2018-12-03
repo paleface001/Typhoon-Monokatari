@@ -3,7 +3,7 @@ const Routes = require('./typhoon_route');
 const G = require('@antv/g');
 
 const  SIZE = 50;
-const DURATION = 500;
+const DURATION = 300;
 
 class Typhoon {
   constructor(cfg) {
@@ -70,19 +70,20 @@ class Typhoon {
     self.canvas.draw();
   }
 
-  clear() {
-
+  hide() {
+    const self = this;
+    self.shape.hide();
+    self.routes.hide();
   }
 
-  destory() {
-    const self = this;
-    self.shape.destory();
-    self.routes.destory();
+  clear() {
+    this.canvas.clear();
+    this.canvas.draw();
   }
 
   _onLandfall(){
     const self = this;
-    const width = 10;
+    const width = 20;
     const height = self._SpeedHeightMapping(self.data.maxSpeed);
     const color = self._SpeedColorMapping(self.data.maxSpeed);
     const initial_path = [
@@ -100,7 +101,7 @@ class Typhoon {
     const mountain = self.canvas.addShape('path',{
       attrs:{
         path:initial_path,
-        fill:color,
+        fill:'l(90) 0:rgba('+color+',1)'+' '+'1:rgba('+color+',0)',
         opacity:0,
         zIndex:10000
       }
@@ -129,7 +130,7 @@ class Typhoon {
     const r = min_color[0] + (value - min_speed) / (max_speed - min_speed) * (max_color[0] - min_color[0]);
     const g = min_color[1] + (value - min_speed) / (max_speed - min_speed) * (max_color[1] - min_color[1]);
     const b = min_color[2] + (value - min_speed) / (max_speed - min_speed) * (max_color[2] - min_color[2]);
-    return  'rgb('+r+','+g+','+b+')';
+    return  r+','+g+','+b;
   }
 
 }

@@ -57,11 +57,7 @@ class TyphoonShape {
     self.head.attr('y',-self.radius - 5);
   }
 
-  clear() {
-    
-  }
-
-  destory() {
+  hide(){
     const self = this;
     const children = self.container.get('children');
     for(let i=0; i<children.length; i++){
@@ -285,8 +281,8 @@ class TyphoonShape {
     const self = this;
     const max = 10;
     const min = 0;
-    const max_size = 30;
-    const min_size = 10;
+    const max_size = 40;
+    const min_size = 15;
     return min_size + (d - min) / (max - min) * (max_size - min_size);
   }
 
