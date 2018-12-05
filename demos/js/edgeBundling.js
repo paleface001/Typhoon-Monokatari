@@ -1,76 +1,18 @@
-function createBundlingData(rawData) {
-    const nodes = rawData.nodes;
-    const links = rawData.links;
-    //const width = window.innerWidth;
-    const width = 1200;
-    const height = window.innerHeight;
-    const hypotenuse = Math.sqrt(width * width + height * height);
-    const innerScale = function (value) {
-        const domain = [0, hypotenuse];
-        const range = [1, 15];
-        return linear(value, range, domain);
-    };
-
-    const bundleData = { nodes: [], links: [], paths: [] };
-    bundleData.nodes = nodes;
-    links.forEach(link => {
-        const length = distance(link.source, link.target);
-        const total = Math.round(innerScale(length));
-        const xScale = function (value) {
-            const domain = [0, total + 1];
-            const range = [link.source.x, link.target.x];
-            return linear(value, range, domain);
-        };
-        const yScale = function (value) {
-            const domain = [0, total + 1];
-            const range = [link.source.y, link.target.y];
-            return linear(value, range, domain);
-        };
-        let source = link.source;
-        let target = null;
-        const local = [source];
-        for (let j = 0; j <= total; j++) {
-            target = {
-                x: xScale(j),
-                y: yScale(j)
-            };
-            local.push(target);
-            bundleData.nodes.push(target);
-
-            bundleData.links.push({
-                source: source,
-                target: target
-            });
-
-            source = target;
-        }
-        local.push(link.target);
-        // add last link to target node
-        bundleData.links.push({
-            source: target,
-            target: link.target
-        });
-        bundleData.paths.push(local);
-
-    });//end of links loop
-    return bundleData;
-}
-
-function bundlingEdge(data, container) {
+function bundlingEdge(data, svg,canvas) {
     const line = d3.linkVertical()
         .x(function (d) { return d.x; })
         .y(function (d) { return d.y; });
 
-    const links = container.append("g").attr("id", "test")
+    const links = svg.append("g").attr("id", "test")
         .selectAll("path.test")
         .data(data.links)
         .enter()
         .append("path")
-        .attr("d", line)
-        .style("fill", "none")
-        .style("stroke", function (d) { return d.color; })
-        .style("stroke-width", 2)
-        .style("stroke-opacity", 0.5);
+        .attr("d", function(d){return arrow(d);})
+        .attr('color',function(d){return d.color;})
+        .attr('dir',function(d){return getDir(d);})
+        .style("fill", function (d) { return d.color; })
+        .style('opacity',0);
         
     const layout = d3.forceSimulation()
         .alphaDecay(0.05)
@@ -86,10 +28,16 @@ function bundlingEdge(data, container) {
             //links.attr("d", line);
         })
         .on("end", function (d) {
-            links.attr("d", line);
+            links.attr("d", arrow);
+            const shapes = svg.select('#test').selectAll('path').nodes();
+            processBundle(shapes,canvas);
+            canvas.draw();
         });
     layout.nodes(data.nodes);
 }
+
+
+
 
 /*------ assistance methods for edge bundling--------*/
 function distance(source, target) {
@@ -102,12 +50,116 @@ function linear(value, range, domain) {
     return range[0] + (value - domain[0]) / (domain[1] - domain[0]) * (range[1] - range[0]);
 }
 
-function linkPath(start,end){
-    return "M" + start.x + "," + start.y
-        + "C" + (start.x+end.x)/2 + "," + (start.y+end.y)/2
-        + " " + start.x + "," + end.y
-        + " " + end.x + "," + end.y;
+function processBundle(shapes,canvas){
+    for(let i=0; i<shapes.length; i++){
+        const shape = shapes[i];
+        const bbox = shape.getBBox();
+        const size = bbox.width * bbox.height;
+        if(size<1600){
+            shape.remove();
+        }else{
+            const pathData = shape.getAttribute('d');
+            const color = shape.getAttribute('color');
+            const dir = shape.getAttribute('dir');
+            const path = canvas.addShape('path',{
+                attrs:{
+                    path:pathData,
+                    //fill:'l(90) 0:' + getRGB(color,1.0) + ' ' + '1:' + getRGB(color,0.0)
+                    fill:directionColor(dir,color),
+                    lineWidth:0
+                }
+            });
+        }
     }
+}
+
+function arrow(d){
+    const dx = d.target.x - d.source.x;
+    const dy = d.target.y - d.source.y;
+    const dir_vec = {
+        x: dx,
+        y: dy
+      };
+      //normalize
+      var length = Math.sqrt(dir_vec.x * dir_vec.x + dir_vec.y * dir_vec.y);
+      dir_vec.x *= 1 / length;
+      dir_vec.y *= 1 / length;
+      //rotate dir_vector by -90 and scale
+      const left_angle = -Math.PI / 2;
+      var x_left = Math.cos(left_angle) * dir_vec.x - Math.sin(left_angle) * dir_vec.y;
+      var y_left = Math.sin(left_angle) * dir_vec.x + Math.cos(left_angle) * dir_vec.y;
+      //rotate dir_vector by 90 and scale
+      const right_angle = Math.PI / 2;
+      var x_right = Math.cos(right_angle) * dir_vec.x - Math.sin(right_angle) * dir_vec.y;
+      var y_right = Math.sin(right_angle) * dir_vec.x + Math.cos(right_angle) * dir_vec.y;
+
+      const start = {x:d.source.x,y:d.source.y};
+      const end = {x:d.source.x+0.9*dx,y:d.source.y+0.9*dy};
+
+      const left_scale_x1 = x_left * 4;
+      const left_scale_x2 = x_left * 12;
+
+      const left_scale_y1 = y_left * 4;
+      const left_scale_y2 = y_left * 12;
+
+      const right_scale_x1 = x_right * 4;
+      const right_scale_x2 = x_right * 12;
+
+      const right_scale_y1 = y_right * 4;
+      const right_scale_y2 = y_right * 12;
+
+      const arrow_point = {x:d.source.x+0.8*dx,y:d.source.y+0.8*dy};
+
+      const left1 = {x:arrow_point.x+left_scale_x1, y:arrow_point.y+left_scale_y1};
+      const left2 = {x:arrow_point.x+left_scale_x2, y:arrow_point.y+left_scale_y2};
+
+      const right1 = {x:arrow_point.x+right_scale_x1, y:arrow_point.y+right_scale_y1};
+      const right2 = {x:arrow_point.x+right_scale_x2, y:arrow_point.y+right_scale_y2};
+
+      return 'M'+start.x+','+start.y+ ' L'+left1.x+','+left1.y+' L'+left2.x+','+left2.y+' L'+end.x+','+end.y+' L'+right2.x+','+right2.y+' L'+right1.x+','+right1.y+ 'L'+start.x+','+start.y+' Z';
+
+    //return 'M'+d.source.x+','+d.source.y+' L'+d.target.x+','+d.target.y;
+}
+
+function directionColor(dir,color){
+    if(dir === 'up'){
+        return 'l(90) 0:' + getRGB(color,0.8) + ' ' + '1:' + getRGB(color,0.0);
+    }
+    if(dir === 'down'){
+        return 'l(90) 0:' + getRGB(color,0.0) + ' ' + '1:' + getRGB(color,0.8);
+    }
+    if(dir === 'left'){
+        return 'l(0) 0:' + getRGB(color,0.8) + ' ' + '1:' + getRGB(color,0.0);
+    }
+    if(dir === 'right'){
+        return 'l(0) 0:' + getRGB(color,0.0) + ' ' + '1:' + getRGB(color,0.8);
+    }
+}
+
+function getDir(d){
+    const dx = d.target.x - d.source.x;
+    const dy = d.target.y - d.source.y;
+    if(Math.abs(dx)>Math.abs(dy)){
+        if(dx<0) return 'left';
+        if(dx>0) return 'right';
+    }
+    else{
+        if(dy>0) return 'down';
+        if(dy<0) return 'up';
+    }
+}
+
+//16进制颜色转rgb
+function getRGB(hex,alpha){
+    var rgb=[0,0,0];
+    if(/#(..)(..)(..)/g.test(hex)){
+        rgb=[parseInt(RegExp.$1,16),parseInt(RegExp.$2,16),parseInt(RegExp.$3,16)];
+        rgb.push(alpha);
+    };
+    return "rgba("+rgb.join(",")+")";
+}
+
+
 
 /*--------- point cluster ---------*/
 function clustering(points,container) {

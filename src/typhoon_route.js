@@ -57,6 +57,7 @@ class TyphoonRoutes {
         }
 
         self.level = currentData.level;
+        self.path = path;
     }
 
     hide(){
@@ -80,7 +81,7 @@ class TyphoonRoutes {
         const self = this;
         const nodes = [{x:self.routeData.start.x,y:self.routeData.start.y},
                        {x:self.routeData.end.x,y:self.routeData.end.y}];
-        const link = {source:nodes[0],target:nodes[1],color:self.color};
+        const link = {source:nodes[0],target:nodes[1],color:self.color,shape:self.path};
         return {nodes:nodes,link:link};
     }
 

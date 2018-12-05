@@ -24,7 +24,7 @@ const interval = window.setInterval(function(){
       } else {
         clearInterval(interval);
         clearTyphoonRoute();
-        bundlingEdge(rawEdge,svg);
+        bundlingEdge(rawEdge,svg,canvas);
         //clustering(landfallPoints,canvas);
       }
 },1);

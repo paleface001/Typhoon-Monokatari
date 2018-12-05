@@ -15742,6 +15742,7 @@ var TyphoonRoutes = function () {
         }
 
         self.level = currentData.level;
+        self.path = path;
     };
 
     TyphoonRoutes.prototype.hide = function hide() {
@@ -15762,7 +15763,7 @@ var TyphoonRoutes = function () {
     TyphoonRoutes.prototype.getEdgeData = function getEdgeData() {
         var self = this;
         var nodes = [{ x: self.routeData.start.x, y: self.routeData.start.y }, { x: self.routeData.end.x, y: self.routeData.end.y }];
-        var link = { source: nodes[0], target: nodes[1], color: self.color };
+        var link = { source: nodes[0], target: nodes[1], color: self.color, shape: self.path };
         return { nodes: nodes, link: link };
     };
 
