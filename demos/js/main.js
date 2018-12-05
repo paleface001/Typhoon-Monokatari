@@ -8,6 +8,7 @@ const step = 1000 * 60 * 60 * 12; //每六小时
 let current = startStamp;
 const typhoons = {};
 const rawEdge = {nodes:[],links:[]};
+const landfallPoints = [];
 const canvas = new G2.G.Canvas({
     containerId: 'typhoon',
     width: $('#typhoon').width(),
@@ -24,8 +25,9 @@ const interval = window.setInterval(function(){
         clearInterval(interval);
         clearTyphoonRoute();
         bundlingEdge(rawEdge,svg);
+        //clustering(landfallPoints,canvas);
       }
-},300);
+},1);
 
 function readData(timeString){
     const currentData = timeData[timeString];
@@ -36,9 +38,10 @@ function readData(timeString){
             typhoonNames.push(id);
             const index = currentData[i].dataIndex;
             const data = typhoonData[id][index];
+            let pos;
             if(typhoons.hasOwnProperty(id)){
                 const tp = typhoons[id];
-                const pos = projection([data.lng,data.lat]);
+                pos = projection([data.lng,data.lat]);
                 tp.setData(data);
                 tp.setPosition(pos[0], pos[1]);
                 tp.update();
@@ -47,7 +50,7 @@ function readData(timeString){
                 rawEdge.nodes.push(...edge.nodes);
                 rawEdge.links.push(edge.link);
             }else{
-                const pos = projection([data.lng,data.lat]);
+                pos = projection([data.lng,data.lat]);
                 const tp = new typhoon({
                     id,
                     data,
@@ -55,6 +58,10 @@ function readData(timeString){
                     position: {x:pos[0],y:pos[1]}
                 });
                 typhoons[id] = tp;
+            }
+            //save landfall data
+            if(data.hasOwnProperty('landfall')){
+                landfallPoints.push(pos);
             }
         }
     }

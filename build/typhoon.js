@@ -15297,7 +15297,7 @@ var Routes = __webpack_require__(5);
 var G = __webpack_require__(0);
 
 var SIZE = 50;
-var DURATION = 300;
+var DURATION = 1;
 
 var Typhoon = function () {
   function Typhoon(cfg) {

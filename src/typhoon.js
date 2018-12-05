@@ -3,7 +3,7 @@ const Routes = require('./typhoon_route');
 const G = require('@antv/g');
 
 const  SIZE = 50;
-const DURATION = 300;
+const DURATION = 1;
 
 class Typhoon {
   constructor(cfg) {

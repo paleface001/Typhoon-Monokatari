@@ -58,7 +58,6 @@ function createBundlingData(rawData) {
 
 function bundlingEdge(data, container) {
     const line = d3.linkVertical()
-        //.curve(d3.curveBundle)
         .x(function (d) { return d.x; })
         .y(function (d) { return d.y; });
 
@@ -69,9 +68,10 @@ function bundlingEdge(data, container) {
         .append("path")
         .attr("d", line)
         .style("fill", "none")
-        .style("stroke", function(d){return d.color;})
+        .style("stroke", function (d) { return d.color; })
         .style("stroke-width", 2)
         .style("stroke-opacity", 0.5);
+        
     const layout = d3.forceSimulation()
         .alphaDecay(0.05)
         .force("charge", d3.forceManyBody()
@@ -86,13 +86,12 @@ function bundlingEdge(data, container) {
             //links.attr("d", line);
         })
         .on("end", function (d) {
-            //console.log("Layout complete!");
             links.attr("d", line);
         });
     layout.nodes(data.nodes);
 }
 
-/*------ assistance methods --------*/
+/*------ assistance methods for edge bundling--------*/
 function distance(source, target) {
     const dx2 = Math.pow(target.x - source.x, 2);
     const dy2 = Math.pow(target.y - source.y, 2);
@@ -101,4 +100,77 @@ function distance(source, target) {
 
 function linear(value, range, domain) {
     return range[0] + (value - domain[0]) / (domain[1] - domain[0]) * (range[1] - range[0]);
+}
+
+function linkPath(start,end){
+    return "M" + start.x + "," + start.y
+        + "C" + (start.x+end.x)/2 + "," + (start.y+end.y)/2
+        + " " + start.x + "," + end.y
+        + " " + end.x + "," + end.y;
+    }
+
+/*--------- point cluster ---------*/
+function clustering(points,container) {
+    const clusters = clusterfck.kmeans(points, 4);
+    for (let i = 0; i < clusters.length; i++) {
+        const cluster = clusters[i];
+        const bbox = getBbox(cluster);
+        container.addShape('circle',{
+            attrs:{
+                x:bbox.cx,
+                y:bbox.cy,
+                r:bbox.size,
+                fill:'red',
+                opacity:0.5
+            }
+        });
+    }
+}
+
+//点集合中有点X，集合中不存在有点在横轴和纵轴的坐标均大于X，则X即为边缘点
+function findBoundaryPoints(ps) {
+    const boundaries = [ ];
+    for (let i = 0; i < ps.length; i++) {
+        const point = ps[i];
+        if ( isBoundary(point,ps,i) ){
+           boundaries.push(point);
+        }
+    }
+    boundaries.sort(function (a, b) {
+        return a[0] - b[0];
+    });
+    return boundaries;
+}
+
+function isBoundary (point,ps,index){
+    for(let i=0; i<ps.length; i++){
+        if(i !== index){
+            const p = ps[i];
+            if( p[0]>point[0] && p[1]>point[1] ){
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function getBbox(points){
+    let maxX = 0;
+    let minX = 10000;
+    let maxY = 0;
+    let minY = 10000;
+    for(let i=0; i<points.length; i++){
+        const x = points[i][0];
+        const y = points[i][1];
+        if(x>maxX) maxX = x;
+        if(x<minX) minX = x;
+        if(y>maxY) maxY = y;
+        if(y<minY) minY = y;  
+    }
+    const width = maxX - minX;
+    const height = maxY - minY;
+    const size = Math.max(width,height);
+    const cx = minX + width/2;
+    const cy = minY + height/2;
+    return { size,cx,cy};
 }
