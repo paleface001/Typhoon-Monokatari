@@ -3,7 +3,7 @@ const Routes = require('./typhoon_route');
 const G = require('@antv/g');
 
 const  SIZE = 50;
-const DURATION = 1;
+const DURATION = 500;
 
 class Typhoon {
   constructor(cfg) {
@@ -125,8 +125,8 @@ class Typhoon {
   _SpeedColorMapping(value){
     const max_speed = 40;
     const min_speed = 10;
-    const max_color = [228,24,136];
-    const min_color = [31,179,236];
+    const max_color = [51,51,67];
+    const min_color = [169,153,137];
     const r = min_color[0] + (value - min_speed) / (max_speed - min_speed) * (max_color[0] - min_color[0]);
     const g = min_color[1] + (value - min_speed) / (max_speed - min_speed) * (max_color[1] - min_color[1]);
     const b = min_color[2] + (value - min_speed) / (max_speed - min_speed) * (max_color[2] - min_color[2]);

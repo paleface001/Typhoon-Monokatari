@@ -1,6 +1,7 @@
 const G = require('@antv/g');
 
-const POWER_COLOR = ['#bad1d3','#dacc76','#fdc52d','#f8812c','#f23c3e'];
+//const POWER_COLOR = ['#bad1d3','#dacc76','#fdc52d','#f8812c','#f23c3e'];
+const POWER_COLOR = ['#f69f91','#f08e8c','#e68088','#d67385','#bf6d84','#a66881','#88647f','#67607c','#365d7c'];
 
 class TyphoonRoutes {
     constructor(cfg) {
@@ -46,8 +47,8 @@ class TyphoonRoutes {
                     fillOpacity: 0,
                     x: routeData.start.x,
                     y: routeData.start.y,
-                    stroke:'#eef2f5',
-                    lineWidth:2
+                    stroke:'#ccccd0',
+                    lineWidth:1
                 }
             });
             outer_circle.animate({
@@ -67,8 +68,8 @@ class TyphoonRoutes {
         for(let i=0; i<pathes.length; i++){
             const path = pathes[i];
             path.animate({
-                lineWidth:1,
-                opacity:0.4
+                lineWidth:2,
+                opacity:0.2
             }, 1000, 'easeLinear');
         }
     }

@@ -27,7 +27,7 @@ const interval = window.setInterval(function(){
         bundlingEdge(rawEdge,svg,canvas);
         //clustering(landfallPoints,canvas);
       }
-},1);
+},500);
 
 function readData(timeString){
     const currentData = timeData[timeString];

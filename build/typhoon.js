@@ -15297,7 +15297,7 @@ var Routes = __webpack_require__(5);
 var G = __webpack_require__(0);
 
 var SIZE = 50;
-var DURATION = 1;
+var DURATION = 500;
 
 var Typhoon = function () {
   function Typhoon(cfg) {
@@ -15413,8 +15413,8 @@ var Typhoon = function () {
   Typhoon.prototype._SpeedColorMapping = function _SpeedColorMapping(value) {
     var max_speed = 40;
     var min_speed = 10;
-    var max_color = [228, 24, 136];
-    var min_color = [31, 179, 236];
+    var max_color = [51, 51, 67];
+    var min_color = [169, 153, 137];
     var r = min_color[0] + (value - min_speed) / (max_speed - min_speed) * (max_color[0] - min_color[0]);
     var g = min_color[1] + (value - min_speed) / (max_speed - min_speed) * (max_color[1] - min_color[1]);
     var b = min_color[2] + (value - min_speed) / (max_speed - min_speed) * (max_color[2] - min_color[2]);
@@ -15435,7 +15435,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var G = __webpack_require__(0);
 
 var DIRS = ['ne', 'se', 'sw', 'nw'];
-var POWER_COLOR = ['#bad1d3', '#dacc76', '#fdc52d', '#f8812c', '#f23c3e'];
+//const POWER_COLOR = ['#bad1d3','#dacc76','#fdc52d','#f8812c','#f23c3e'];
+var POWER_COLOR = ['#f69f91', '#f08e8c', '#e68088', '#d67385', '#bf6d84', '#a66881', '#88647f', '#67607c', '#365d7c'];
 
 var TyphoonShape = function () {
   function TyphoonShape(cfg) {
@@ -15527,7 +15528,7 @@ var TyphoonShape = function () {
       attrs: {
         path: left_upper_path,
         fill: color,
-        opacity: 0.7
+        opacity: 0.9
       }
     });
     var left_lower_path = [['M', vertices.c.x, vertices.c.y], ['L', vertices.se.x, vertices.se.y], ['A', self.radius / 2, self.radius / 2, 0, 0, 0, vertices.c.x, vertices.c.y], ['Z']];
@@ -15535,7 +15536,7 @@ var TyphoonShape = function () {
       attrs: {
         path: left_lower_path,
         fill: color,
-        opacity: 0.7
+        opacity: 0.9
       }
     });
     var right_upper_path = [['M', vertices.c.x, vertices.c.y], ['L', vertices.nw.x, vertices.nw.y], ['A', self.radius / 2, self.radius / 2, 0, 0, 0, vertices.c.x, vertices.c.y], ['Z']];
@@ -15543,7 +15544,7 @@ var TyphoonShape = function () {
       attrs: {
         path: right_upper_path,
         fill: color,
-        opacity: 0.7
+        opacity: 0.9
       }
     });
     var right_lower_path = [['M', vertices.c.x, vertices.c.y], ['L', vertices.sw.x, vertices.sw.y], ['A', self.radius / 2, self.radius / 2, 0, 0, 1, vertices.c.x, vertices.c.y], ['Z']];
@@ -15551,17 +15552,18 @@ var TyphoonShape = function () {
       attrs: {
         path: right_lower_path,
         fill: color,
-        opacity: 0.7
+        opacity: 0.9
       }
     });
     //draw head
     self.head = self.container.addShape('text', {
       attrs: {
         text: self.id,
-        fontSize: 12,
-        fill: 'black',
+        fontSize: 14,
+        fontWeight: 'bold',
+        fill: '#1e1e1e',
         stroke: 'white',
-        lineWidth: 2,
+        lineWidth: 1,
         textAlign: 'center',
         textBaseline: 'middle',
         x: 0,
@@ -15684,7 +15686,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var G = __webpack_require__(0);
 
-var POWER_COLOR = ['#bad1d3', '#dacc76', '#fdc52d', '#f8812c', '#f23c3e'];
+//const POWER_COLOR = ['#bad1d3','#dacc76','#fdc52d','#f8812c','#f23c3e'];
+var POWER_COLOR = ['#f69f91', '#f08e8c', '#e68088', '#d67385', '#bf6d84', '#a66881', '#88647f', '#67607c', '#365d7c'];
 
 var TyphoonRoutes = function () {
     function TyphoonRoutes(cfg) {
@@ -15731,8 +15734,8 @@ var TyphoonRoutes = function () {
                     fillOpacity: 0,
                     x: routeData.start.x,
                     y: routeData.start.y,
-                    stroke: '#eef2f5',
-                    lineWidth: 2
+                    stroke: '#ccccd0',
+                    lineWidth: 1
                 }
             });
             outer_circle.animate({
@@ -15752,8 +15755,8 @@ var TyphoonRoutes = function () {
         for (var i = 0; i < pathes.length; i++) {
             var path = pathes[i];
             path.animate({
-                lineWidth: 1,
-                opacity: 0.4
+                lineWidth: 2,
+                opacity: 0.2
             }, 1000, 'easeLinear');
         }
     };

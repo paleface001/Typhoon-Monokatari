@@ -10,7 +10,7 @@
     <style>
         body {
             overflow: hidden;
-            background-color: #eef2f5;
+            background-color: #ccccd0;
         }
 
         #chart {
@@ -29,6 +29,16 @@
             left: 0px;
         }
 
+        #sideBoard {
+            width:400px;
+            height:100%;
+            position: absolute;
+            right:0px;
+            top:0px;
+            background-color: white;
+            box-shadow: 5px 0px 20px 0px #b4b4b4;
+        }
+
         #time {
             width: 400px;
             height: 30px;
@@ -36,6 +46,7 @@
             bottom:10px;
             left:10px;
             font-size:30px;
+            display: none;
         }
     </style>
 </head>
@@ -43,6 +54,7 @@
 <body>
     <div id="chart"></div>
     <div id='typhoon'></div>
+    <div id= 'sideBoard'></div>
     <div id='time'>test</div>
 </body>
 <script src="./assets/static/jquery-3.2.1.min.js"></script>
@@ -59,7 +71,7 @@
     var width = 1400,
         height = 1400 * ratio;
     var projection = d3.geoMercator()
-        .center([-60, 40])
+        .center([-42, 40])
         .scale(600)
         .rotate([-180, 0]);
     var svg = d3.select("#chart").append("svg")
@@ -76,7 +88,8 @@
             .enter()
             .append("path")
             .attr("d", path)
-            .attr('fill', 'white');
+            .attr('fill', '#f1f1f0')
+            .attr('stroke','#c8c8c8');
     });
     //load typhoon data
     $.getJSON('data/pacific_typhoon_2017.json', function (typhoonData) {

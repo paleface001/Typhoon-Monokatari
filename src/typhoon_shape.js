@@ -1,7 +1,9 @@
 const G = require('@antv/g');
 
 const DIRS = ['ne', 'se', 'sw', 'nw'];
-const POWER_COLOR = ['#bad1d3','#dacc76','#fdc52d','#f8812c','#f23c3e'];
+//const POWER_COLOR = ['#bad1d3','#dacc76','#fdc52d','#f8812c','#f23c3e'];
+const POWER_COLOR = ['#f69f91','#f08e8c','#e68088','#d67385','#bf6d84','#a66881','#88647f','#67607c','#365d7c'];
+
 
 class TyphoonShape {
   constructor(cfg) {
@@ -96,7 +98,7 @@ class TyphoonShape {
       attrs:{
         path:left_upper_path,
         fill:color,
-        opacity:0.7
+        opacity:0.9
       }
     });
     const left_lower_path = [
@@ -109,7 +111,7 @@ class TyphoonShape {
       attrs:{
         path:left_lower_path,
         fill:color,
-        opacity:0.7
+        opacity:0.9
       }
     });
     const right_upper_path = [
@@ -122,7 +124,7 @@ class TyphoonShape {
       attrs:{
         path:right_upper_path,
         fill:color,
-        opacity:0.7
+        opacity:0.9
       }
     });
     const right_lower_path = [
@@ -135,17 +137,18 @@ class TyphoonShape {
       attrs:{
         path:right_lower_path,
         fill:color,
-        opacity:0.7
+        opacity:0.9
       }
     });
     //draw head
     self.head = self.container.addShape('text', {
       attrs: {
         text:self.id,
-        fontSize:12,
-        fill:'black',
+        fontSize:14,
+        fontWeight:'bold',
+        fill:'#1e1e1e',
         stroke:'white',
-        lineWidth:2,
+        lineWidth:1,
         textAlign:'center',
         textBaseline:'middle',
         x:0,
