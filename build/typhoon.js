@@ -15332,6 +15332,12 @@ var Typhoon = function () {
     });
 
     self.canvas.draw();
+
+    //sound
+    self.sound = new Audio('hurricane.mp3');
+    self.sound.loop = true;
+    self.sound.volume = 0;
+    self.sound.play();
   };
 
   Typhoon.prototype.setData = function setData(data) {
@@ -15364,12 +15370,16 @@ var Typhoon = function () {
       self._onLandfall();
     }
     self.canvas.draw();
+    //sound volume
+    var currentVolume = self._powerMapping(self.data.level);
+    self.sound.volume = currentVolume;
   };
 
   Typhoon.prototype.hide = function hide() {
     var self = this;
     self.shape.hide();
     self.routes.hide();
+    self.sound.pause();
   };
 
   Typhoon.prototype.clear = function clear() {
@@ -15419,6 +15429,15 @@ var Typhoon = function () {
     var g = min_color[1] + (value - min_speed) / (max_speed - min_speed) * (max_color[1] - min_color[1]);
     var b = min_color[2] + (value - min_speed) / (max_speed - min_speed) * (max_color[2] - min_color[2]);
     return r + ',' + g + ',' + b;
+  };
+
+  Typhoon.prototype._powerMapping = function _powerMapping(value) {
+    var self = this;
+    var max = 10;
+    var min = 0;
+    var max_volumn = 1;
+    var min_volumn = 0;
+    return min_volumn + (value - min) / (max - min) * (max_volumn - min_volumn);
   };
 
   return Typhoon;
@@ -15480,7 +15499,6 @@ var TyphoonShape = function () {
                          0, 1, 0, 
                          x, y, 1 ];*/
     var ulMatrix = [Math.cos(angle), Math.sin(angle), 0, -Math.sin(angle), Math.cos(angle), 0, x, y, 1];
-    self.container.stopAnimate();
     self.container.animate({
       matrix: ulMatrix
     }, self.duartion);

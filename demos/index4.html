@@ -36,7 +36,50 @@
             right:0px;
             top:0px;
             background-color: white;
-            box-shadow: 5px 0px 20px 0px #b4b4b4;
+            box-shadow: 10px 0px 40px 0px black;
+        }
+
+        #title {
+            width: 70%; 
+            height: auto;
+            position: absolute;
+            top:20%;
+            left:15%;
+        }
+
+        #down {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+            bottom: 10%;
+            left:50%;
+            margin-left: -20px;
+            cursor: pointer;
+        }
+
+        #typhoonPanel {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top:100%;
+            left:0px;
+            opacity: 0;
+        }
+
+        #timePanel{
+            width: 100%;
+            height: auto;
+            position: absolute;
+            left:5%;
+            top:0px;
+        }
+
+        #timeDataPanel{
+            width: 90%;
+            height:60%;
+            position: absolute;
+            top:15%;
+            left:5%;
         }
 
         #time {
@@ -54,7 +97,20 @@
 <body>
     <div id="chart"></div>
     <div id='typhoon'></div>
-    <div id= 'sideBoard'></div>
+    <!--sideboard-->
+    <div id= 'sideBoard'>
+    <div id = 'typhoonPanel'>
+        <div id = 'timePanel'>
+            <p>2017年</p>
+            <p>7 月 02 日  02 : 00</p>
+        </div>
+        <div id='timeDataPanel'>
+        </div>
+    </div>
+    <img id = 'title' src="images/title.png" />
+    <img id = 'down' src="images/down.png"/>
+    </div>
+    <!--sideboard-->
     <div id='time'>test</div>
 </body>
 <script src="./assets/static/jquery-3.2.1.min.js"></script>
@@ -67,6 +123,8 @@
 <script src="./js/edgeBundling.js"></script>
 <script src="./js/main.js"></script>
 <script>
+    let index = 0;
+    let plotShapes;
     const ratio = 0.52;
     var width = 1400,
         height = 1400 * ratio;
@@ -89,12 +147,26 @@
             .append("path")
             .attr("d", path)
             .attr('fill', '#f1f1f0')
-            .attr('stroke','#c8c8c8');
+            .attr('stroke','#c8c8c8')
+            .style('opacity',0)
+            .attr('transform','scale(0.1,0.1)')
+            .transition()
+            .duration(1000)
+            .attr('transform','scale(1,1)')
+            .style('opacity',1);
     });
     //load typhoon data
     $.getJSON('data/pacific_typhoon_2017.json', function (typhoonData) {
         $.getJSON('./data/typhoon_time_2017.json', function (timeData) {
-            main(typhoonData,timeData,projection);
+            $('#down').click(function(){
+                if(index === 0){
+                    $('#title').animate({opacity:0,top:'-50%'},300);
+                    $('#typhoonPanel').animate({opacity:1,top:'0%'},300);
+                    main(typhoonData,timeData,projection);
+                    plotShapes = timelineChart(typhoonData);
+                }
+                index+=1;
+            }); 
         });
     });
 </script>

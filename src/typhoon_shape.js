@@ -34,7 +34,7 @@ class TyphoonShape {
     //heading
     const dx = x - self.x;
     const dy = y - self.y;
-    const angle = Math.atan(dy / dx) + Math.PI / 2;
+    let angle = Math.atan(dy / dx)+Math.PI/2;
     const mat = self.container.attr('matrix');
     mat[0] = Math.cos(angle);
     mat[1] = Math.sin(angle);
@@ -47,7 +47,6 @@ class TyphoonShape {
     const ulMatrix = [Math.cos(angle), Math.sin(angle), 0,
     -Math.sin(angle), Math.cos(angle), 0,
       x, y, 1];
-    self.container.stopAnimate();
     self.container.animate({
       matrix: ulMatrix
     }, self.duartion);

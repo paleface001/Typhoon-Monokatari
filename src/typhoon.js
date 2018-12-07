@@ -36,6 +36,12 @@ class Typhoon {
     });
 
     self.canvas.draw();
+
+    //sound
+    self.sound = new Audio('hurricane.mp3');
+    self.sound.loop = true;
+    self.sound.volume = 0;
+    self.sound.play();
   }
 
   setData(data) {
@@ -68,12 +74,16 @@ class Typhoon {
       self._onLandfall();
     }
     self.canvas.draw();
+    //sound volume
+    const currentVolume = self._powerMapping(self.data.level);
+    self.sound.volume = currentVolume;
   }
 
   hide() {
     const self = this;
     self.shape.hide();
     self.routes.hide();
+    self.sound.pause();
   }
 
   clear() {
@@ -131,6 +141,15 @@ class Typhoon {
     const g = min_color[1] + (value - min_speed) / (max_speed - min_speed) * (max_color[1] - min_color[1]);
     const b = min_color[2] + (value - min_speed) / (max_speed - min_speed) * (max_color[2] - min_color[2]);
     return  r+','+g+','+b;
+  }
+
+  _powerMapping(value){
+    const self = this;
+    const max = 10;
+    const min = 0;
+    const max_volumn = 1;
+    const min_volumn = 0;
+    return min_volumn + (value - min) / (max - min) * (max_volumn - min_volumn);
   }
 
 }
