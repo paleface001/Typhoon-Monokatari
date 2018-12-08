@@ -11,17 +11,19 @@ function bundlingEdge(data, svg,canvas) {
         .attr("d", function(d){return arrow(d);})
         .attr('color',function(d){return d.color;})
         .attr('dir',function(d){return getDir(d);})
+        .attr('cliperPathInit',function(d){return cliperPathInit(d);})
+        .attr('cliperPath',function(d){return cliperPath(d);})
         .style("fill", function (d) { return d.color; })
         .style('opacity',0);
         
     const layout = d3.forceSimulation()
-        .alphaDecay(0.05)
+        .alphaDecay(0.05)//0.05
         .force("charge", d3.forceManyBody()
-            .strength(10)
+            .strength(5)//10
             .distanceMax(100)
         )
         .force("link", d3.forceLink()
-            .strength(0.8)
+            .strength(2)//0.8
             .distance(0)
         )
         .on("tick", function (d) {
@@ -29,6 +31,8 @@ function bundlingEdge(data, svg,canvas) {
         })
         .on("end", function (d) {
             links.attr("d", arrow);
+            links.attr('cliperPathInit',cliperPathInit);
+            links.attr('cliperPath',cliperPath);
             const shapes = svg.select('#test').selectAll('path').nodes();
             processBundle(shapes,canvas);
             canvas.draw();
@@ -66,8 +70,25 @@ function processBundle(shapes,canvas){
                     path:pathData,
                     //fill:'l(90) 0:' + getRGB(color,1.0) + ' ' + '1:' + getRGB(color,0.0)
                     fill:directionColor(dir,color),
-                    lineWidth:0
+                    lineWidth:0,
+                    opacity:1
                 }
+            });
+            //cliper animation
+            const cliperPathInit = shape.getAttribute('cliperPathInit');
+            const cliperPath = shape.getAttribute('cliperPath');
+            const cliper = canvas.addShape('path',{
+                attrs:{
+                    path:cliperPathInit,
+                    opacity:0
+                }
+            });
+            path.attr('clip',cliper);
+           cliper.animate({
+                path:cliperPath
+            }, 800, 'easeLinear', function () {
+                path.attr('clip', null);
+                cliper.remove();
             });
         }
     }
@@ -116,9 +137,74 @@ function arrow(d){
       const right1 = {x:arrow_point.x+right_scale_x1, y:arrow_point.y+right_scale_y1};
       const right2 = {x:arrow_point.x+right_scale_x2, y:arrow_point.y+right_scale_y2};
 
+
       return 'M'+start.x+','+start.y+ ' L'+left1.x+','+left1.y+' L'+left2.x+','+left2.y+' L'+end.x+','+end.y+' L'+right2.x+','+right2.y+' L'+right1.x+','+right1.y+ 'L'+start.x+','+start.y+' Z';
 
     //return 'M'+d.source.x+','+d.source.y+' L'+d.target.x+','+d.target.y;
+}
+
+function cliperPathInit(d){
+    const dx = d.target.x - d.source.x;
+    const dy = d.target.y - d.source.y;
+    const dir_vec = {
+        x: dx,
+        y: dy
+      };
+      //normalize
+      var length = Math.sqrt(dir_vec.x * dir_vec.x + dir_vec.y * dir_vec.y);
+      dir_vec.x *= 1 / length;
+      dir_vec.y *= 1 / length;
+      //rotate dir_vector by -90 and scale
+      const left_angle = -Math.PI / 2;
+      var x_left = Math.cos(left_angle) * dir_vec.x - Math.sin(left_angle) * dir_vec.y;
+      var y_left = Math.sin(left_angle) * dir_vec.x + Math.cos(left_angle) * dir_vec.y;
+      //rotate dir_vector by 90 and scale
+      const right_angle = Math.PI / 2;
+      var x_right = Math.cos(right_angle) * dir_vec.x - Math.sin(right_angle) * dir_vec.y;
+      var y_right = Math.sin(right_angle) * dir_vec.x + Math.cos(right_angle) * dir_vec.y;
+
+      const left_x = d.source.x + x_left*30;
+      const left_y = d.source.y + y_left*30;
+
+      const right_x = d.source.x + x_right*30;
+      const right_y = d.source.y + y_right*30;
+
+      return 'M'+left_x+','+left_y+' L'+left_x+','+left_y+' L'+right_x+','+right_y+' L'+right_x+','+right_y+'Z';
+}
+
+function cliperPath(d){
+    const dx = d.target.x - d.source.x;
+    const dy = d.target.y - d.source.y;
+    const dir_vec = {
+        x: dx,
+        y: dy
+      };
+      //normalize
+      var length = Math.sqrt(dir_vec.x * dir_vec.x + dir_vec.y * dir_vec.y);
+      dir_vec.x *= 1 / length;
+      dir_vec.y *= 1 / length;
+      //rotate dir_vector by -90 and scale
+      const left_angle = -Math.PI / 2;
+      var x_left = Math.cos(left_angle) * dir_vec.x - Math.sin(left_angle) * dir_vec.y;
+      var y_left = Math.sin(left_angle) * dir_vec.x + Math.cos(left_angle) * dir_vec.y;
+      //rotate dir_vector by 90 and scale
+      const right_angle = Math.PI / 2;
+      var x_right = Math.cos(right_angle) * dir_vec.x - Math.sin(right_angle) * dir_vec.y;
+      var y_right = Math.sin(right_angle) * dir_vec.x + Math.cos(right_angle) * dir_vec.y;
+
+      const left_bottom_x = d.source.x + x_left*30;
+      const left_bottom_y = d.source.y + y_left*30;
+
+      const right_bottom_x = d.source.x + x_right*30;
+      const right_bottom_y = d.source.y + y_right*30;
+
+      const left_top_x = d.target.x + x_left*30;
+      const left_top_y = d.target.y + y_left*30;
+
+      const right_top_x = d.target.x + x_right*30;
+      const right_top_y = d.target.y + y_right*30;
+
+      return 'M'+left_bottom_x+','+left_bottom_y+' L'+left_top_x+','+left_top_y+' L'+right_top_x+','+right_top_y+' L'+right_bottom_x+','+right_bottom_y+'Z';
 }
 
 function directionColor(dir,color){
@@ -158,6 +244,9 @@ function getRGB(hex,alpha){
     };
     return "rgba("+rgb.join(",")+")";
 }
+
+
+
 
 
 

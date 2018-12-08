@@ -15334,10 +15334,10 @@ var Typhoon = function () {
     self.canvas.draw();
 
     //sound
-    /*self.sound = new Audio('hurricane.mp3');
+    self.sound = new Audio('hurricane.mp3');
     self.sound.loop = true;
     self.sound.volume = 0;
-    self.sound.play();*/
+    self.sound.play();
   };
 
   Typhoon.prototype.setData = function setData(data) {
@@ -15371,15 +15371,18 @@ var Typhoon = function () {
     }
     self.canvas.draw();
     //sound volume
-    //const currentVolume = self._powerMapping(self.data.level);
-    //self.sound.volume = currentVolume;
+    var currentVolume = self._powerMapping(self.data.level);
+    self.sound.volume = currentVolume;
+    if (currentVolume !== self.sound.volume) {
+      self._soundFadeIn(currentVolume);
+    }
   };
 
   Typhoon.prototype.hide = function hide() {
     var self = this;
     self.shape.hide();
     self.routes.hide();
-    self.sound.pause();
+    self._soundFadeOut();
   };
 
   Typhoon.prototype.clear = function clear() {
@@ -15438,6 +15441,37 @@ var Typhoon = function () {
     var max_volumn = 1;
     var min_volumn = 0;
     return min_volumn + (value - min) / (max - min) * (max_volumn - min_volumn);
+  };
+
+  //sound
+
+
+  Typhoon.prototype._soundFadeIn = function _soundFadeIn(targettVolume) {
+    var self = this;
+    var currentVolume = self.sound.volume;
+    var dir = targettVolume > currentVolume ? 1 : -1;
+    var diff = Math.abs(targettVolume - currentVolume);
+    var step = diff / self.duartion;
+
+    var interval = window.setInterval(function () {
+      currentVolume += step * dir;
+      self.sound.volume = Math.min(1, currentVolume);
+      if (currentVolume >= targettVolume) clearInterval(interval);
+    }, 16);
+  };
+
+  Typhoon.prototype._soundFadeOut = function _soundFadeOut() {
+    var self = this;
+    var currentVolume = self.sound.volume;
+    var step = 0.01;
+    var interval = window.setInterval(function () {
+      currentVolume -= step;
+      self.sound.volume = Math.max(0, currentVolume);
+      if (self.sound.volume <= 0) {
+        clearInterval(interval);
+        self.sound.pause();
+      }
+    }, 16);
   };
 
   return Typhoon;

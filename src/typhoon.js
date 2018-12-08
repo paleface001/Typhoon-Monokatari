@@ -38,10 +38,10 @@ class Typhoon {
     self.canvas.draw();
 
     //sound
-    /*self.sound = new Audio('hurricane.mp3');
+    self.sound = new Audio('hurricane.mp3');
     self.sound.loop = true;
     self.sound.volume = 0;
-    self.sound.play();*/
+    self.sound.play();
   }
 
   setData(data) {
@@ -75,15 +75,18 @@ class Typhoon {
     }
     self.canvas.draw();
     //sound volume
-    //const currentVolume = self._powerMapping(self.data.level);
-    //self.sound.volume = currentVolume;
+    const currentVolume = self._powerMapping(self.data.level);
+    self.sound.volume = currentVolume;
+    if(currentVolume !== self.sound.volume){
+      self._soundFadeIn(currentVolume);
+    }
   }
 
   hide() {
     const self = this;
     self.shape.hide();
     self.routes.hide();
-    self.sound.pause();
+    self._soundFadeOut();
   }
 
   clear() {
@@ -151,6 +154,36 @@ class Typhoon {
     const min_volumn = 0;
     return min_volumn + (value - min) / (max - min) * (max_volumn - min_volumn);
   }
+
+  //sound
+  _soundFadeIn(targettVolume){
+    const self = this;
+    let currentVolume = self.sound.volume;
+    const dir = (targettVolume > currentVolume)?1:-1;
+    const diff = Math.abs(targettVolume - currentVolume);
+    const step = diff / self.duartion;
+
+    const interval = window.setInterval(function(){
+      currentVolume += step*dir;
+      self.sound.volume = Math.min(1,currentVolume);
+      if(currentVolume >= targettVolume) clearInterval(interval);
+    },16);
+  }
+
+  _soundFadeOut(){
+    const self = this;
+    let currentVolume = self.sound.volume;
+    const step = 0.01;
+    const interval = window.setInterval(function(){
+      currentVolume -= step;
+      self.sound.volume = Math.max(0,currentVolume);
+      if(self.sound.volume <= 0) {
+        clearInterval(interval);
+        self.sound.pause();
+      }
+    },16);
+  }
+
 
 }
 

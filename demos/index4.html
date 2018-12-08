@@ -210,6 +210,7 @@
                     main(typhoonData,timeData,projection);
                     plotShapes = timelineChart(typhoonData);
                 }else if(index === 1){
+                    $('#typhoonPanel').animate({opacity:0,top:'-100%'},300);
                     clearInterval(interval);
                     canvas.clear();
                     canvas.draw();
