@@ -51,7 +51,7 @@
             width: 40px;
             height: 40px;
             position: absolute;
-            bottom: 10%;
+            bottom: 5%;
             left:50%;
             margin-left: -20px;
             cursor: pointer;
@@ -67,18 +67,50 @@
         }
 
         #timePanel{
+            font-family: "apercu",sans-serif;
+            font-weight: 300;
             width: 100%;
             height: auto;
             position: absolute;
-            left:5%;
-            top:0px;
+            left:6%;
+            top:40px;
         }
+
+        #timePanel .date{
+            width: 100%;
+            height: 20px;
+            position: relative;
+            float: left;
+            background-image: url(images/calendar.png);
+            background-size: auto 100%;
+            background-repeat: no-repeat;
+            text-indent: 50px;
+            text-decoration:underline;
+        }
+
+        #timePanel .date:after{display:inline-block; width:0; height:100%; vertical-align:middle; content:'';}
+
+        #timePanel .time{
+            width: 100%;
+            height: 20px;
+            position: relative;
+            float: left;
+            margin-top: 20px;
+            background-image: url(images/clock.png);
+            background-size: auto 100%;
+            background-repeat: no-repeat;
+            text-indent: 50px;
+            text-decoration:underline;
+        }
+
+        #timePanel .time:after{display:inline-block; width:0; height:100%; vertical-align:middle; content:'';}
+
 
         #timeDataPanel{
             width: 90%;
             height:60%;
             position: absolute;
-            top:15%;
+            top:20%;
             left:5%;
         }
 
@@ -101,8 +133,12 @@
     <div id= 'sideBoard'>
     <div id = 'typhoonPanel'>
         <div id = 'timePanel'>
-            <p>2017年</p>
-            <p>7 月 02 日  02 : 00</p>
+            <div class='date'>
+                2017 年 12 月 5 日
+            </div>
+            <div class='time'>
+                12 : 00
+            </div>
         </div>
         <div id='timeDataPanel'>
         </div>
@@ -125,6 +161,15 @@
 <script>
     let index = 0;
     let plotShapes;
+    let interval;
+    //create canvas
+    const canvas = new G2.G.Canvas({
+        containerId: 'typhoon',
+        width: $('#typhoon').width(),
+        height: $('#typhoon').height(),
+        renderer: 'svg'
+    });
+    //create svg and map
     const ratio = 0.52;
     var width = 1400,
         height = 1400 * ratio;
@@ -164,6 +209,12 @@
                     $('#typhoonPanel').animate({opacity:1,top:'0%'},300);
                     main(typhoonData,timeData,projection);
                     plotShapes = timelineChart(typhoonData);
+                }else if(index === 1){
+                    clearInterval(interval);
+                    canvas.clear();
+                    canvas.draw();
+                    const rawEdge =  edgeDataPreparation(typhoonData, projection);
+                    bundlingEdge(rawEdge, svg, canvas);
                 }
                 index+=1;
             }); 

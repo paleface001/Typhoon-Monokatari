@@ -15334,10 +15334,10 @@ var Typhoon = function () {
     self.canvas.draw();
 
     //sound
-    self.sound = new Audio('hurricane.mp3');
+    /*self.sound = new Audio('hurricane.mp3');
     self.sound.loop = true;
     self.sound.volume = 0;
-    self.sound.play();
+    self.sound.play();*/
   };
 
   Typhoon.prototype.setData = function setData(data) {
@@ -15371,8 +15371,8 @@ var Typhoon = function () {
     }
     self.canvas.draw();
     //sound volume
-    var currentVolume = self._powerMapping(self.data.level);
-    self.sound.volume = currentVolume;
+    //const currentVolume = self._powerMapping(self.data.level);
+    //self.sound.volume = currentVolume;
   };
 
   Typhoon.prototype.hide = function hide() {

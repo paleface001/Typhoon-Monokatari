@@ -38,10 +38,10 @@ class Typhoon {
     self.canvas.draw();
 
     //sound
-    self.sound = new Audio('hurricane.mp3');
+    /*self.sound = new Audio('hurricane.mp3');
     self.sound.loop = true;
     self.sound.volume = 0;
-    self.sound.play();
+    self.sound.play();*/
   }
 
   setData(data) {
@@ -75,8 +75,8 @@ class Typhoon {
     }
     self.canvas.draw();
     //sound volume
-    const currentVolume = self._powerMapping(self.data.level);
-    self.sound.volume = currentVolume;
+    //const currentVolume = self._powerMapping(self.data.level);
+    //self.sound.volume = currentVolume;
   }
 
   hide() {
