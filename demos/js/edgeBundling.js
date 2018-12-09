@@ -89,7 +89,7 @@ function processBundle(shapes,canvas){
             }, 800, 'easeLinear', function () {
                 path.attr('clip', null);
                 cliper.remove();
-            });
+            },Math.random()*1000);
         }
     }
 }
@@ -117,17 +117,17 @@ function arrow(d){
       const start = {x:d.source.x,y:d.source.y};
       const end = {x:d.source.x+0.9*dx,y:d.source.y+0.9*dy};
 
-      const left_scale_x1 = x_left * 4;
-      const left_scale_x2 = x_left * 12;
+      const left_scale_x1 = x_left * 2;
+      const left_scale_x2 = x_left * 8;
 
-      const left_scale_y1 = y_left * 4;
-      const left_scale_y2 = y_left * 12;
+      const left_scale_y1 = y_left * 2;
+      const left_scale_y2 = y_left * 8;
 
-      const right_scale_x1 = x_right * 4;
-      const right_scale_x2 = x_right * 12;
+      const right_scale_x1 = x_right * 2;
+      const right_scale_x2 = x_right * 8;
 
-      const right_scale_y1 = y_right * 4;
-      const right_scale_y2 = y_right * 12;
+      const right_scale_y1 = y_right * 2;
+      const right_scale_y2 = y_right * 8;
 
       const arrow_point = {x:d.source.x+0.8*dx,y:d.source.y+0.8*dy};
 
@@ -252,20 +252,55 @@ function getRGB(hex,alpha){
 
 /*--------- point cluster ---------*/
 function clustering(points,container) {
-    const clusters = clusterfck.kmeans(points, 4);
+    const clusters = clusterfck.kmeans(points, 5);
     for (let i = 0; i < clusters.length; i++) {
+        const delay = Math.random()*1000;
         const cluster = clusters[i];
         const bbox = getBbox(cluster);
-        container.addShape('circle',{
+        const circle = container.addShape('circle',{
             attrs:{
                 x:bbox.cx,
                 y:bbox.cy,
-                r:bbox.size,
-                fill:'red',
-                opacity:0.5
+                r:0,
+                fill:'#0c51d0',
+                fillOpacity:0.1,
+                strokeOpacity:1
             }
         });
+        circle.animate({
+            r:bbox.size/2
+        }, 300, 'easeLinear',delay);
+        const innerCircle = container.addShape('circle',{
+            attrs:{
+                x:bbox.cx,
+                y:bbox.cy,
+                r:0,
+                fill:'#0c51d0',
+                opacity:0.8,
+                shadowBlur: 5,
+                shadowColor: 'rgba(0, 0, 0, .45)',
+            }
+        });
+        innerCircle.animate({
+            r:12
+        }, 300, 'easeLinear',200,delay);
+        const number = container.addShape('text',{
+            attrs:{
+                x:bbox.cx,
+                y:bbox.cy,
+                text:cluster.length,
+                fill:'white',
+                fontSize:12,
+                textAlign:'center',
+                textBaseline:'middle',
+                opacity:0
+            }
+        });
+        number.animate({
+            opacity:1
+        }, 300, 'easeLinear',400,delay);
     }
+    container.draw();
 }
 
 //点集合中有点X，集合中不存在有点在横轴和纵轴的坐标均大于X，则X即为边缘点

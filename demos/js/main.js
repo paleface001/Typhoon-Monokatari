@@ -38,10 +38,6 @@ function main(typhoonData, timeData, projection) {
                     tp.setData(data);
                     tp.setPosition(pos[0], pos[1]);
                     tp.update();
-                    //add typhoon route data to edge raw data
-                    /*const edge = tp.routes.getEdgeData();
-                    rawEdge.nodes.push(...edge.nodes);
-                    rawEdge.links.push(edge.link);*/
                 } else {
                     pos = projection([data.lng, data.lat]);
                     const tp = new typhoon({
@@ -52,10 +48,6 @@ function main(typhoonData, timeData, projection) {
                     });
                     typhoons[id] = tp;
                     updatePlotshape(id);
-                }
-                //save landfall data
-                if (data.hasOwnProperty('landfall')) {
-                    landfallPoints.push(pos);
                 }
             }
         }
@@ -240,7 +232,8 @@ function updatePlotshape(id) {
 }
 
 //part3 edgeBundling
-function edgeDataPreparation(typhoonData, projection) {
+function dataPreparation(typhoonData, projection) {
+    const landfalls = [];
     const edges = { nodes: [], links: [] };
     for (let key in typhoonData) {
         const data = typhoonData[key];
@@ -253,9 +246,13 @@ function edgeDataPreparation(typhoonData, projection) {
             const link = { source: nodes[0], target: nodes[1], color: levelColorMapping(data[i].level) };
             edges.nodes.push(...nodes);
             edges.links.push(link);
+            //if landfall
+            if(data[i].hasOwnProperty('landfall')){
+                landfalls.push(target);
+            }
         }
     }
-    return edges;
+    return {edges,landfalls};
 }
 
 

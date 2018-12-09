@@ -114,15 +114,23 @@
             left:5%;
         }
 
-        #time {
-            width: 400px;
-            height: 30px;
+        #trendPanel{
+            width: 100%;
+            height: 100%;
             position: absolute;
-            bottom:10px;
-            left:10px;
-            font-size:30px;
-            display: none;
+            top:100%;
+            left:0px;
+            opacity: 0;
         }
+
+        #routesTrend{
+            width: 90%;
+            height: auto;
+            position: absolute;
+            top:30%;
+            left:5%;
+        }
+
     </style>
 </head>
 
@@ -142,6 +150,9 @@
         </div>
         <div id='timeDataPanel'>
         </div>
+    </div>
+    <div id='trendPanel'>
+        <img id="routesTrend" src='images/trend.png' />
     </div>
     <img id = 'title' src="images/title.png" />
     <img id = 'down' src="images/down.png"/>
@@ -203,6 +214,7 @@
     //load typhoon data
     $.getJSON('data/pacific_typhoon_2017.json', function (typhoonData) {
         $.getJSON('./data/typhoon_time_2017.json', function (timeData) {
+            const dataForAnalyzing = dataPreparation(typhoonData, projection);
             $('#down').click(function(){
                 if(index === 0){
                     $('#title').animate({opacity:0,top:'-50%'},300);
@@ -211,11 +223,17 @@
                     plotShapes = timelineChart(typhoonData);
                 }else if(index === 1){
                     $('#typhoonPanel').animate({opacity:0,top:'-100%'},300);
+                    $('#trendPanel').animate({opacity:1,top:'0%'},300);
                     clearInterval(interval);
                     canvas.clear();
                     canvas.draw();
-                    const rawEdge =  edgeDataPreparation(typhoonData, projection);
+                    const rawEdge =  dataForAnalyzing.edges;
                     bundlingEdge(rawEdge, svg, canvas);
+                }else if(index === 2){
+                    $('#trendPanel').animate({opacity:0,top:'-100%'},300);
+                    canvas.clear();
+                    canvas.draw();
+                    clustering(dataForAnalyzing.landfalls,canvas);
                 }
                 index+=1;
             }); 
