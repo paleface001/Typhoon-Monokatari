@@ -173,6 +173,8 @@
     let index = 0;
     let plotShapes;
     let interval;
+    let typhoons = {};
+    const timelines = {shapes:[]};
     //create canvas
     const canvas = new G2.G.Canvas({
         containerId: 'typhoon',
@@ -219,11 +221,12 @@
                 if(index === 0){
                     $('#title').animate({opacity:0,top:'-50%'},300);
                     $('#typhoonPanel').animate({opacity:1,top:'0%'},300);
-                    main(typhoonData,timeData,projection);
                     plotShapes = timelineChart(typhoonData);
+                    main(typhoonData,timeData,projection);  
                 }else if(index === 1){
                     $('#typhoonPanel').animate({opacity:0,top:'-100%'},300);
                     $('#trendPanel').animate({opacity:1,top:'0%'},300);
+                    stopAll();
                     clearInterval(interval);
                     canvas.clear();
                     canvas.draw();

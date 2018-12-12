@@ -246,10 +246,6 @@ function getRGB(hex,alpha){
 }
 
 
-
-
-
-
 /*--------- point cluster ---------*/
 function clustering(points,container) {
     const clusters = clusterfck.kmeans(points, 5);
@@ -350,3 +346,4 @@ function getBbox(points){
     const cy = minY + height/2;
     return { size,cx,cy};
 }
+

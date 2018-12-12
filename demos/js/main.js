@@ -6,19 +6,16 @@ function main(typhoonData, timeData, projection) {
     const endStamp = Date.parse(endTime);
     const step = 1000 * 60 * 60 * 12; //每六小时
     let current = startStamp;
-    const typhoons = {};
-    const landfallPoints = [];
     interval = window.setInterval(function () {
         if (current < endStamp) {
             current += step;
             updateTimePanel(current);
+            updateTimeline(current);
             const timeString = _toTimeString(current);
             readData(timeString);
         } else {
             clearInterval(interval);
             clearTyphoonRoute();
-            bundlingEdge(rawEdge, svg, canvas);
-            //clustering(landfallPoints,canvas);
         }
     }, 500);
 
@@ -123,7 +120,10 @@ function timelineChart(data) {
     const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
     const axisContainer = canvas.addGroup();
     const padding = 40;
-    const axisHeight = height / 12;
+    const axisHeight = height / 12;    
+    timelines.padding = padding;
+    timelines.width = width;
+    timelines.segHeight = axisHeight;
     for (let i = 1; i <= 12; i++) {
         const y = axisHeight * i;
         const path = [
@@ -133,10 +133,26 @@ function timelineChart(data) {
         axisContainer.addShape('path', {
             attrs: {
                 path,
-                stroke: '#969696',
+                stroke: '#c8c8c8',
                 lineWidth: 1
             }
         });
+        //axis for timeline
+        const timeline = axisContainer.addShape('path', {
+            attrs: {
+                path:[
+                    ['M',padding,y],
+                    ['L',padding,y]
+                ],
+                stroke: '#35b7f3',
+                lineWidth: 2,
+                lineCap:'round',
+                endArrow:true,
+                opacity:0
+            }
+        });
+        timelines.shapes.push(timeline);
+
         axisContainer.addShape('text', {
             attrs: {
                 text: months[i - 1],
@@ -144,13 +160,14 @@ function timelineChart(data) {
                 y: y,
                 textBaseline: 'middle',
                 fontSize: 12,
-                fill: '#969696'
+                fill: '#c8c8c8'
             }
         });
     }
 
+
     //typhoon shape
-    const shapeGrooup = canvas.addGroup();
+    const shapeGroup = canvas.addGroup();
     for (let key in data) {
         const d = data[key];
         const level = getMaxLevel(d);
@@ -163,7 +180,7 @@ function timelineChart(data) {
             ['M', start.x - radius, start.y],
             ['A', radius, radius, 0, 0, 1, start.x + radius, start.y]
         ];
-        const shape = shapeGrooup.addShape('path', {
+        const shape = shapeGroup.addShape('path', {
             attrs: {
                 path,
                 fill: color,
@@ -231,6 +248,36 @@ function updatePlotshape(id) {
     }, 500, 'easeLinear');
 }
 
+//update timeline
+function updateTimeline(stamp){
+    const datetime = new Date();
+    datetime.setTime(stamp);
+    const month = datetime.getMonth()+1;
+    const day = datetime.getDate();
+    const padding = timelines.padding;
+    const width = timelines.width;
+    const segHeight = timelines.segHeight;
+    for(let i =0; i<timelines.shapes.length; i++){
+        const index = i+1;
+        const shape = timelines.shapes[i];
+        if(index !== month){
+            shape.attr('opacity',0);
+        }else{
+            shape.attr('opacity',1);
+            const y = segHeight * month;
+            const x = padding + (day / 31) * width;
+            const path = [
+                ['M', padding, y],
+                ['L', x, y]
+            ];
+            shape.animate({
+                path
+            },200,'easeLinear');
+        }
+    }
+
+}
+
 //part3 edgeBundling
 function dataPreparation(typhoonData, projection) {
     const landfalls = [];
@@ -253,6 +300,14 @@ function dataPreparation(typhoonData, projection) {
         }
     }
     return {edges,landfalls};
+}
+
+//segmnet controller
+function stopAll(){
+    for(let key in typhoons){
+        const tp = typhoons[key];
+        tp.hide();
+    }
 }
 
 
